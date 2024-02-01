@@ -1,8 +1,7 @@
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String, Boolean, DateTime
 from uuid import uuid4
+from ..database import Base 
 
-Base = declarative_base()
 
 class VPC(Base):
     __tablename__ = "vpc"

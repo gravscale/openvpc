@@ -13,10 +13,10 @@ def include_routers_from_directory(directory: str):
             module_name_full = f"routes.{module_name_short}_routes"
             module_name_partial = f"{module_name_short}_routes"
 
-            print("routes filename: ", filename)
-            print("routes module_name_short: ", module_name_short)
-            print("routes module_name_partial: ", module_name_partial)
-            print("routes module_name_full: ", module_name_full)
+            #print("routes filename: ", filename)
+            #print("routes module_name_short: ", module_name_short)
+            #print("routes module_name_partial: ", module_name_partial)
+            #print("routes module_name_full: ", module_name_full)
 
             module = importlib.import_module(f".{module_name_full}", package="openvpc")
             router = getattr(module, "router", None)

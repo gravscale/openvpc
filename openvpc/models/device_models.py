@@ -1,10 +1,8 @@
 from sqlalchemy import Column, String, ForeignKey, DateTime, Integer, Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
 from uuid import uuid4
-
-Base = declarative_base()
+from ..database import Base  
 
 class Credential(Base):
     __tablename__ = "credential"
@@ -26,7 +24,7 @@ class Device(Base):
     host = Column(String(255))
     port = Column(Integer)
     protocol = Column(String(50))
-    zone_id = Column(String(36), ForeignKey('zones.id'))
+    zone_id = Column(String(36), ForeignKey('zone.id'))
     credential_id = Column(String(36), ForeignKey('credential.id'))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -35,3 +33,4 @@ class Device(Base):
 
     # Relacionamentos
     credential = relationship("Credential")
+    zone = relationship("Zone")

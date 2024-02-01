@@ -13,6 +13,7 @@ python-dotenv = "^1.0.0"
 aiomysql = "^0.2.0"
 uvicorn = "^0.24.0.post1"
 alembic = "^1.12.1"
+vyapi = {path = "../vyapi"}
 
 
 [build-system]

@@ -6,6 +6,7 @@ from alembic import context
 import os
 import importlib
 import sys
+from database import Base 
 
 # Adicione o caminho do diretório do projeto ao sys.path
 # para garantir que possamos importar openvpc.database
@@ -21,10 +22,10 @@ def include_models_from_directory(directory: str):
             module_name_full = f"models.{module_name_short}_models"
             module_name_partial = f"{module_name_short}_models"
 
-            print("models filename: ", filename)
-            print("models module_name_short: ", module_name_short)
-            print("models module_name_partial: ", module_name_partial)
-            print("models module_name_full: ", module_name_full)
+            #print("models filename: ", filename)
+            #print("models module_name_short: ", module_name_short)
+            #print("models module_name_partial: ", module_name_partial)
+            #print("models module_name_full: ", module_name_full)
 
             module = importlib.import_module(f".{module_name_full}", package="openvpc")
 
@@ -57,8 +58,8 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 # Por enquanto, deixaremos como None, pois não sei os detalhes dos seus modelos.
-#target_metadata = Base.metadata
-target_metadata = [base.metadata for base in include_models_from_directory("models")]
+target_metadata = Base.metadata
+#target_metadata = [base.metadata for base in include_models_from_directory("models")]
 
 
 # other values from the config, defined by the needs of env.py,

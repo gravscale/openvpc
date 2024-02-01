@@ -8,6 +8,9 @@ from fastapi import HTTPException
 from ..database import SessionLocal as AsyncSessionLocal
 from uuid import UUID
 from datetime import datetime
+from devices.factory import Device_Factory
+from sqlalchemy import update
+
 
 # Helper function to validate UUID format
 async def validate_uuid(uuid_str: str):
@@ -16,45 +19,6 @@ async def validate_uuid(uuid_str: str):
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid UUID format.")
 
-
-# Async CRUD operation for creating a device
-async def create_device(device_data: DeviceCreate):
-    async with AsyncSessionLocal() as session:
-        # Handle zone_uuid and zone_name validations
-        if device_data.zone_uuid and device_data.zone_name:
-            raise HTTPException(status_code=400, detail="Provide either zone_uuid or zone_name, not both.")
-        if not device_data.zone_uuid and not device_data.zone_name:
-            raise HTTPException(status_code=400, detail="Provide either zone_uuid or zone_name.")
-
-        # Validate and fetch Zone
-        if device_data.zone_uuid:
-            await validate_uuid(device_data.zone_uuid)
-            zone = await session.get(Zone, device_data.zone_uuid)
-            if not zone:
-                raise HTTPException(status_code=404, detail="Zone not found with provided UUID.")
-        elif device_data.zone_name:
-            result = await session.execute(select(Zone).where(Zone.name == device_data.zone_name))
-            zone = result.scalars().first()
-            if not zone:
-                raise HTTPException(status_code=404, detail="Zone not found with provided name.")
-        device_data.zone_id = zone.id  # Assign zone UUID to device
-
-        # Validate Credential
-        if device_data.credential_id:
-            await validate_uuid(device_data.credential_id)
-            credential = await get_credential(device_data.credential_id)
-            if not credential:
-                raise HTTPException(status_code=404, detail="Credential not found.")
-
-        try:
-            db_device = Device(**device_data.dict())
-            session.add(db_device)
-            await session.commit()
-            await session.refresh(db_device)
-            return db_device
-        except IntegrityError:
-            await session.rollback()
-            raise HTTPException(status_code=400, detail="Duplicate device name.")
 
 # Async CRUD operation for retrieving a device
 async def get_device(device_id: str):
@@ -65,23 +29,6 @@ async def get_device(device_id: str):
             raise HTTPException(status_code=404, detail="Device not found.")
         return device
 
-# Async CRUD operation for updating a device
-async def update_device(device_id: str, device_data: DeviceUpdate):
-    await validate_uuid(device_id)
-    async with AsyncSessionLocal() as session:
-        db_device = await get_device(device_id)
-        if not db_device:
-            raise HTTPException(status_code=404, detail="Device not found.")
-        if device_data.credential_id:
-            await validate_uuid(device_data.credential_id)
-            credential = await get_credential(device_data.credential_id)
-            if not credential:
-                raise HTTPException(status_code=404, detail="Credential not found.")
-        await session.execute(
-            update(Device).where(Device.id == device_id).values(**device_data.dict())
-        )
-        await session.commit()
-        return await get_device(device_id)
 
 # Async CRUD operation for deleting a device
 async def delete_device(device_id: str):
@@ -159,3 +106,101 @@ async def list_credentials():
     async with AsyncSessionLocal() as session:
         result = await session.execute(select(Credential))
         return result.scalars().all()
+
+
+
+async def validate_and_connect_device(device_data, credential_id):
+    async with AsyncSessionLocal() as session:
+        # Validação de zone_uuid e zone_name
+        if device_data.zone_id and device_data.zone_name:
+            raise HTTPException(status_code=400, detail="Provide either zone_id or zone_name, not both.")
+        if not device_data.zone_id and not device_data.zone_name:
+            raise HTTPException(status_code=400, detail="Provide either zone_id or zone_name.")
+
+        # Validação e obtenção do Zone ID
+        zone_id = None
+        if device_data.zone_id:
+            await validate_uuid(device_data.zone_id)
+            zone = await session.get(Zone, device_data.zone_id)
+            if zone:
+                zone_id = zone.id
+        elif device_data.zone_name:
+            result = await session.execute(select(Zone).where(Zone.name == device_data.zone_name))
+            zone = result.scalars().first()
+            if zone:
+                zone_id = zone.id
+        if not zone_id:
+            raise HTTPException(status_code=404, detail="Zone not found with provided information.")
+
+        # Validação da credencial
+        if credential_id:
+            await validate_uuid(credential_id)
+            credential = await get_credential(credential_id)
+            if not credential:
+                raise HTTPException(status_code=404, detail="Credential not found.")
+
+        # Criação da instância do dispositivo
+        device_factory = Device_Factory()
+        device_instance = device_factory.instance(
+            type=device_data.device_type,
+            host=device_data.host,
+            port=device_data.port,
+            protocol=device_data.protocol,
+            username=credential.user,
+            password=credential.password,
+            private_key=credential.private_key,
+            verify=False,   # FIXME
+            timeout=10      # FIXME
+        )
+
+        # Verificação da conexão
+        if not device_instance.is_connected():
+            raise HTTPException(status_code=400, detail="Unable to connect to the device.")
+
+        return zone_id, device_instance
+
+async def create_device(device_data: DeviceCreate):
+    zone_id, device_instance = await validate_and_connect_device(device_data, device_data.credential_id)
+
+    async with AsyncSessionLocal() as session:
+        try:
+            device_dict = device_data.dict()
+            device_dict['zone_id'] = zone_id
+
+            # Remoção de campos não presentes no modelo Device
+            device_dict.pop('zone_uuid', None)
+            device_dict.pop('zone_name', None)
+
+            db_device = Device(**device_dict)
+            session.add(db_device)
+            await session.commit()
+            await session.refresh(db_device)
+            return db_device
+        except IntegrityError:
+            await session.rollback()
+            raise HTTPException(status_code=400, detail="Duplicate device name.")
+
+async def update_device(device_id: str, device_data: DeviceUpdate):
+    await validate_uuid(device_id)
+
+    async with AsyncSessionLocal() as session:
+        db_device = await get_device(device_id)
+        if not db_device:
+            raise HTTPException(status_code=404, detail="Device not found.")
+
+        zone_id, device_instance = await validate_and_connect_device(device_data, device_data.credential_id)
+
+        try:
+            update_dict = device_data.dict(exclude_unset=True)
+            update_dict['zone_id'] = zone_id
+
+            # Remoção de campos não presentes no modelo Device
+            update_dict.pop('zone_uuid', None)
+            update_dict.pop('zone_name', None)
+
+            await session.execute(update(Device).where(Device.id == device_id).values(**update_dict))
+            await session.commit()
+            return await get_device(device_id)
+        except IntegrityError:
+            await session.rollback()
+            raise HTTPException(status_code=400, detail="Error updating device.")
