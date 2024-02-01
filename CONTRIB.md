@@ -41,7 +41,7 @@ from sqlalchemy import Column, String
 from .database import Base
 
 class Router(Base):
-    __tablename__ = 'routers'
+    __tablename__ = 'router'
     id = Column(String, primary_key=True)
     # Additional fields...
 ```
