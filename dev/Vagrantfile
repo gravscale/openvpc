@@ -7,6 +7,7 @@
 
 
 Vagrant.configure("2") do |config|
+
   # VPC na zona sp1
   config.vm.define "vpc_v1_sp1" do |sp1|
     sp1.vm.box = "vyos/current"
@@ -17,6 +18,9 @@ Vagrant.configure("2") do |config|
     sp1.ssh.password = "vyos"
     sp1.ssh.insert_key = false
     # Outras configurações específicas para a VPC sp1 podem ser adicionadas aqui
+    config.vm.provider "virtualbox" do |vb|
+      vb.gui = true
+    end
   end
 
   # VPC na zona sp2
@@ -29,11 +33,13 @@ Vagrant.configure("2") do |config|
     sp2.ssh.password = "vyos"
     sp2.ssh.insert_key = false
     # Outras configurações específicas para a VPC sp2 podem ser adicionadas aqui
+    config.vm.provider "virtualbox" do |vb|
+      vb.gui = true
+    end
   end
 end
 
   # Configurações glob
-
 
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
 # configures the configuration version (we support older styles for

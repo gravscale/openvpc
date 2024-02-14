@@ -7,14 +7,13 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-fastapi = "^0.104.1"
-sqlalchemy = "^2.0.23"
-python-dotenv = "^1.0.0"
+fastapi = "^0.109.2"
+uvicorn = "^0.27.1"
+sqlalchemy = {version = "^2.0.27", extras = ["asyncio"]}
 aiomysql = "^0.2.0"
-uvicorn = "^0.24.0.post1"
-alembic = "^1.12.1"
-vyapi = {path = "../vyapi"}
-
+python-dotenv = "^1.0.1"
+alembic = "^1.13.1"
+pyvyos = {path = "../pyvyos"}
 
 [build-system]
 requires = ["poetry-core"]
