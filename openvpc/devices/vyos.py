@@ -16,7 +16,7 @@ class Device_Vyos:
         timeout=10,
     ):
         self.device = VyDevice(
-            hostname=host, key=password, port=port, protocol=protocol, verify=verify
+            hostname=host, apikey=password, port=port, protocol=protocol, verify=verify
         )
 
     @classmethod
