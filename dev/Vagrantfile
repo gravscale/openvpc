@@ -5,37 +5,45 @@
 # 172.30.0.0/24 - primeiro bloco de vpc zona sp1
 # 172.30.1.0/24 - primeiro bloco de vpc zona sp2
 
+$script = <<-SHELL
+  cfg=/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper  
+  $cfg begin
+  $cfg set service https api debug
+  $cfg set service https api keys id apikey key vyos
+  $cfg set service https listen-address $1
+  $cfg set service https port 8080
+  $cfg commit
+  $cfg end
+SHELL
 
 Vagrant.configure("2") do |config|
 
   # VPC na zona sp1
-  config.vm.define "vpc_v1_sp1" do |sp1|
+  config.vm.define "vyos_sp1" do |sp1|
     sp1.vm.box = "vyos/current"
-    sp1.vm.hostname = "vpc-v1-sp1"
-    sp1.vm.network "private_network", ip: "172.30.0.4"
-    sp1.vm.network "forwarded_port", guest: 8080, host: 2081 
+    sp1.vm.hostname = "vyos-sp1"
+    sp1.vm.network "public_network", ip: "192.168.0.51", bridge: "wlo1"
+    # sp1.vm.network "private_network", ip: "172.30.0.4"
+    # sp1.vm.network "forwarded_port", guest: 8080, host: 2081
     sp1.ssh.username = "vyos"
     sp1.ssh.password = "vyos"
     sp1.ssh.insert_key = false
     # Outras configurações específicas para a VPC sp1 podem ser adicionadas aqui
-    config.vm.provider "virtualbox" do |vb|
-      vb.gui = true
-    end
+    sp1.vm.provision "shell", inline: $script, args: ["192.168.0.51"]
   end
 
   # VPC na zona sp2
-  config.vm.define "vpc_v2_sp2" do |sp2|
+  config.vm.define "vyos_sp2" do |sp2|
     sp2.vm.box = "vyos/current"
-    sp2.vm.hostname = "vpc-v2-sp2"
-    sp2.vm.network "private_network", ip: "172.30.1.4"
-    sp2.vm.network "forwarded_port", guest: 8080, host: 2082
+    sp2.vm.hostname = "vyos-sp2"
+    sp2.vm.network "public_network", ip: "192.168.0.52", bridge: "wlo1"
+    # sp2.vm.network "private_network", ip: "172.30.1.4"
+    # sp2.vm.network "forwarded_port", guest: 8080, host: 2082
     sp2.ssh.username = "vyos"
     sp2.ssh.password = "vyos"
     sp2.ssh.insert_key = false
     # Outras configurações específicas para a VPC sp2 podem ser adicionadas aqui
-    config.vm.provider "virtualbox" do |vb|
-      vb.gui = true
-    end
+    sp2.vm.provision "shell", inline: $script, args: ["192.168.0.52"]
   end
 end
 
