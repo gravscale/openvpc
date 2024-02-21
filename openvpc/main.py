@@ -1,36 +1,28 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
-from .database import engine, Base
-import os
-import importlib
+from loguru import logger
+from routers import include_routers_from_directory
+from settings import get_settings
 
-app = FastAPI()
+settings = get_settings()
 
-# importar automaticamente todos os routers no diretório de rotas
-def include_routers_from_directory(directory: str):
-    for filename in os.listdir(directory):
-        if filename.endswith("_routes.py"):
-            module_name_short = filename.replace('_routes.py', '')
-            module_name_full = f"routes.{module_name_short}_routes"
-            module_name_partial = f"{module_name_short}_routes"
 
-            #print("routes filename: ", filename)
-            #print("routes module_name_short: ", module_name_short)
-            #print("routes module_name_partial: ", module_name_partial)
-            #print("routes module_name_full: ", module_name_full)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.add("log/register.log", rotation="10 MB")
 
-            module = importlib.import_module(f".{module_name_full}", package="openvpc")
-            router = getattr(module, "router", None)
-            if router:
-                app.include_router(router)
+    logger.info("Starting up routers...")
+    await include_routers_from_directory(app, "routes")
 
-@app.on_event("startup")
-async def startup():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    yield
 
-# Inclui automaticamente todos os routers da pasta de rotas
-include_routers_from_directory("routes")
+    logger.info("Shutting down...")
+
+
+app = FastAPI(lifespan=lifespan, root_path=settings.ROOT_PATH)
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("openvpc.main:app", host="0.0.0.0", port=8000, reload=True)

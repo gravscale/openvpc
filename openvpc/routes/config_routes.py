@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
 from ..crud.config_crud import get_config, list_configs, set_config
 from ..schemas.config_schemas import ConfigRead, ConfigSetRequest

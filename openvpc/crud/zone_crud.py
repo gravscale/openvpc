@@ -1,9 +1,12 @@
-from ..models.zone_models import Zone
-from sqlalchemy.future import select
-from fastapi import HTTPException
-from ..database import SessionLocal as AsyncSessionLocal
-from ..schemas.zone_schemas import ZoneRequest
 from datetime import datetime
+
+from fastapi import HTTPException
+from sqlalchemy.future import select
+
+from ..database import SessionLocal as AsyncSessionLocal
+from ..models.zone_models import Zone
+from ..schemas.zone_schemas import ZoneRequest
+
 
 async def get_zone():
     async with AsyncSessionLocal() as session:
@@ -14,13 +17,10 @@ async def get_zone():
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 
+
 async def add_zone(zone_request: ZoneRequest):
     async with AsyncSessionLocal() as session:
-        new_zone = Zone(
-            name=zone_request.name,
-            creation_datetime=datetime.now(),
-            status=True
-        )
+        new_zone = Zone(name=zone_request.name, creation_datetime=datetime.now(), status=True)
         session.add(new_zone)
         try:
             await session.commit()

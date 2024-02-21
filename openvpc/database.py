@@ -1,23 +1,21 @@
-import os
+from sqlalchemy.engine import URL
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.orm import declarative_base
 
-from dotenv import load_dotenv
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from .settings import get_settings
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-load_dotenv(os.path.join(BASE_DIR, "dev", ".env"))
-# load_dotenv("./dev/.env")
+settings = get_settings()
 
-USERNAME = os.environ.get("MYSQL_USER")
-PASSWORD = os.environ.get("MYSQL_PASSWORD")
-HOST = os.environ.get("MYSQL_HOST", "127.0.0.1")
-PORT = os.environ.get("MYSQL_PORT", "3306")
-DB = os.environ.get("MYSQL_DATABASE")
-DATABASE_URL = f"mysql+aiomysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DB}"
-DATABASE_URL_SYNC = f"mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DB}"
-# print("################", DATABASE_URL_SYNC)
 
-engine = create_async_engine(DATABASE_URL, echo=True)
-SessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+url = URL.create(
+    drivername="mysql+aiomysql",
+    username=settings.MYSQL_USERNAME,
+    password=settings.MYSQL_PASSWORD,
+    host=settings.MYSQL_HOST,
+    port=settings.MYSQL_PORT,
+    database=settings.MYSQL_DATABASE,
+)
 
+engine = create_async_engine(url, echo=True)
+SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 Base = declarative_base()

@@ -1,11 +1,14 @@
+import json
+from uuid import UUID
+
+from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.future import select
+
+from ..database import SessionLocal as AsyncSessionLocal
 from ..models.config_models import Config
 from ..models.zone_models import Zone
-from sqlalchemy.future import select
-from sqlalchemy.exc import IntegrityError
-from fastapi import HTTPException
-from ..database import SessionLocal as AsyncSessionLocal
-from uuid import UUID
-import json
+
 
 async def get_config(param: str):
     async with AsyncSessionLocal() as session:
@@ -19,9 +22,17 @@ async def get_config(param: str):
             raise HTTPException(status_code=500, detail=str(e))
 
 
-async def set_config(param: str, value: str, format: str = "string", scope_zone: str = None, scope_zone_name: str = None):
+async def set_config(
+    param: str,
+    value: str,
+    format: str = "string",
+    scope_zone: str = None,
+    scope_zone_name: str = None,
+):
     if scope_zone and scope_zone_name:
-        raise HTTPException(status_code=400, detail="Only one of scope_zone and scope_zone_name should be provided")
+        raise HTTPException(
+            status_code=400, detail="Only one of scope_zone and scope_zone_name should be provided"
+        )
 
     # Verifica se o valor é um JSON válido se o formato for 'json'
     if format == "json":
@@ -52,17 +63,18 @@ async def set_config(param: str, value: str, format: str = "string", scope_zone:
 
         new_config = Config(param=param, value=value, format=format, scope_zone=scope_zone)
         session.add(new_config)
-        
+
         try:
             await session.commit()
             return new_config
         except IntegrityError:
             await session.rollback()
-            raise HTTPException(status_code=400, detail="Duplicate configuration for given param and scope_zone")
+            raise HTTPException(
+                status_code=400, detail="Duplicate configuration for given param and scope_zone"
+            )
         except Exception as e:
             await session.rollback()
             raise HTTPException(status_code=500, detail=str(e))
-
 
 
 async def list_configs():

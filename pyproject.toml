@@ -11,6 +11,8 @@ fastapi = "^0.109.2"
 uvicorn = "^0.27.1"
 sqlalchemy = {version = "^2.0.27", extras = ["asyncio"]}
 aiomysql = "^0.2.0"
+pydantic-settings = "^2.2.1"
+loguru = "^0.7.2"
 python-dotenv = "^1.0.1"
 alembic = "^1.13.1"
 pyvyos = {path = "../pyvyos"}

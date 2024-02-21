@@ -3,35 +3,31 @@ import pprint
 from pyvyos.device import VyDevice
 
 
-class Device_Vyos:
+class DeviceVyos:
     def __init__(
         self,
         host,
-        port,
+        key,
         protocol,
-        username=None,
-        password=None,
-        private_key=None,
+        port,
         verify=False,
         timeout=10,
     ):
         self.device = VyDevice(
-            hostname=host, apikey=password, port=port, protocol=protocol, verify=verify
+            hostname=host, apikey=key, port=port, protocol=protocol, verify=verify, timeout=timeout
         )
 
     @classmethod
     def instance(
         cls,
         host,
-        port,
+        key,
         protocol,
-        username=None,
-        password=None,
-        private_key=None,
+        port,
         verify=False,
         timeout=10,
     ):
-        return cls(host, port, protocol, username, password, private_key, verify, timeout)
+        return cls(host, key, protocol, port, verify, timeout)
 
     def show(self, path):
         return self.device.retrieve_show_config(path)

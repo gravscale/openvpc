@@ -1,10 +1,13 @@
-from pydantic import BaseModel
 from datetime import datetime
+
+from pydantic import BaseModel
+
 
 class VPCRequest(BaseModel):
     primary_device_name: str
     secondary_device_name: str
     name: str
+
 
 class VPCRead(BaseModel):
     id: str
@@ -15,4 +18,4 @@ class VPCRead(BaseModel):
     status: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True

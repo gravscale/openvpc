@@ -1,29 +1,23 @@
 import pprint
 
-from .vyos import Device_Vyos
+from .vyos import DeviceVyos
 
 
-class Device_Factory:
+class DeviceFactory:
     def instance(
         self,
         type,
         host,
-        port,
+        key,
         protocol,
-        username=None,
-        password=None,
-        private_key=None,
+        port,
         verify=False,
         timeout=10,
     ):
-        print(
-            f"Device_Factory: {type} {host} {port} {protocol} {username} {password} {private_key} {verify} {timeout}"
-        )
+        print(f"DeviceFactory: {type} {protocol} {host} {port} {verify} {timeout}")
 
         if type == "vyos":
-            return Device_Vyos.instance(
-                host, port, protocol, username, password, private_key, verify, timeout
-            )
+            return DeviceVyos.instance(host, key, protocol, port, verify, timeout)
         else:
             raise ValueError(f"Unknown device type: {type}")
 

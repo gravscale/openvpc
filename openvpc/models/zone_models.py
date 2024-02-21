@@ -1,6 +1,8 @@
-from sqlalchemy import Column, String, Boolean, DateTime
 from uuid import uuid4
-from ..database import Base 
+
+from sqlalchemy import Boolean, Column, DateTime, String
+
+from ..database import Base
 
 
 class Zone(Base):

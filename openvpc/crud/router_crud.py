@@ -1,11 +1,15 @@
+from datetime import datetime
+from uuid import UUID
+
+from fastapi import HTTPException
+from sqlalchemy import update
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.future import select
+
+from ..database import SessionLocal as AsyncSessionLocal
 from ..models.router_models import Router
 from ..schemas.router_schemas import RouterCreate, RouterUpdate
-from sqlalchemy.future import select
-from sqlalchemy.exc import IntegrityError
-from fastapi import HTTPException
-from ..database import SessionLocal as AsyncSessionLocal
-from uuid import UUID
-from datetime import datetime
+
 
 # Helper function to validate UUID format
 async def validate_uuid(uuid_str: str):
@@ -14,11 +18,14 @@ async def validate_uuid(uuid_str: str):
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid UUID format.")
 
+
 # Async CRUD operation for creating a router
 async def create_router(router_data: RouterCreate):
     async with AsyncSessionLocal() as session:
         if router_data.vpc_uuid and router_data.vpc_name:
-            raise HTTPException(status_code=400, detail="Provide either vpc_uuid or vpc_name, not both.")
+            raise HTTPException(
+                status_code=400, detail="Provide either vpc_uuid or vpc_name, not both."
+            )
         if router_data.vpc_uuid:
             await validate_uuid(router_data.vpc_uuid)
 
@@ -32,6 +39,7 @@ async def create_router(router_data: RouterCreate):
             await session.rollback()
             raise HTTPException(status_code=400, detail="Duplicate router name.")
 
+
 # Async CRUD operation for retrieving a router
 async def get_router(router_id: str):
     await validate_uuid(router_id)
@@ -40,6 +48,7 @@ async def get_router(router_id: str):
         if not router:
             raise HTTPException(status_code=404, detail="Router not found.")
         return router
+
 
 # Async CRUD operation for updating a router
 async def update_router(router_id: str, router_data: RouterUpdate):
@@ -50,10 +59,11 @@ async def update_router(router_id: str, router_data: RouterUpdate):
             raise HTTPException(status_code=404, detail="Router not found.")
 
         await session.execute(
-            update(Router).where(Router.id == router_id).values(**router_data.dict())
+            update(Router).where(Router.id == router_id).values(**router_data.model_dump())
         )
         await session.commit()
         return await get_router(router_id)
+
 
 # Async CRUD operation for deleting a router
 async def delete_router(router_id: str):
@@ -68,8 +78,9 @@ async def delete_router(router_id: str):
         await session.commit()
         return db_router
 
+
 # Async CRUD operation for listing routers
 async def list_routers():
     async with AsyncSessionLocal() as session:
-        result = await session.execute(select(Router).where(Router.is_active == True))
+        result = await session.execute(select(Router).where(Router.is_active))
         return result.scalars().all()

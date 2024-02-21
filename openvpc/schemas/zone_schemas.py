@@ -1,8 +1,11 @@
-from pydantic import BaseModel
 from datetime import datetime
+
+from pydantic import BaseModel
+
 
 class ZoneRequest(BaseModel):
     name: str
+
 
 class ZoneRead(BaseModel):
     id: str
@@ -11,4 +14,4 @@ class ZoneRead(BaseModel):
     status: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True

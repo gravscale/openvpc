@@ -1,8 +1,11 @@
-from sqlalchemy import Column, String, DateTime, Boolean, ForeignKey
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
 from uuid import uuid4
-from ..database import Base  
+
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+
+from ..database import Base
+
 
 class Router(Base):
     __tablename__ = "router"
@@ -15,11 +18,7 @@ class Router(Base):
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
     # assocation with VPC (using UUID String)
-    vpc_uuid = Column(String(36), ForeignKey('vpc.id'), nullable=True)
+    vpc_uuid = Column(String(36), ForeignKey("vpc.id"), nullable=True)
 
     # vpc relationship
     vpc = relationship("VPC", backref="router")
-
-
-
-
