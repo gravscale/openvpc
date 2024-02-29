@@ -10,7 +10,7 @@ router = APIRouter()
 
 @router.post("/admin/config", response_model=ConfigRead, operation_id="admin-config-set")
 async def set_config_endpoint(config_request: ConfigSetRequest):
-    config_created = await set_config(**config_request.dict())
+    config_created = await set_config(**config_request.model_dump())
     return config_created
 
 

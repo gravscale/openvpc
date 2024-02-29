@@ -1,5 +1,4 @@
 from datetime import datetime
-from uuid import UUID
 
 from fastapi import HTTPException
 from sqlalchemy import update
@@ -7,16 +6,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.future import select
 
 from ..database import SessionLocal as AsyncSessionLocal
+from ..lib.utils import validate_uuid
 from ..models.router_models import Router
 from ..schemas.router_schemas import RouterCreate, RouterUpdate
-
-
-# Helper function to validate UUID format
-async def validate_uuid(uuid_str: str):
-    try:
-        UUID(uuid_str)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid UUID format.")
 
 
 # Async CRUD operation for creating a router
@@ -30,7 +22,7 @@ async def create_router(router_data: RouterCreate):
             await validate_uuid(router_data.vpc_uuid)
 
         try:
-            db_router = Router(**router_data.dict())
+            db_router = Router(**router_data.model_dump())
             session.add(db_router)
             await session.commit()
             await session.refresh(db_router)

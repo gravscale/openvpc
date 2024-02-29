@@ -1,16 +1,19 @@
-
-from logging.config import fileConfig
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-from alembic import context
-import os
 import importlib
+import os
 import sys
-from database import Base 
+from logging.config import fileConfig
+
+from alembic import context
+from database import Base
+from sqlalchemy import engine_from_config, pool
 
 # Adicione o caminho do diretório do projeto ao sys.path
 # para garantir que possamos importar openvpc.database
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
+# Importa DATABASE_URL de seu módulo de configuração de banco de dados
+from openvpc.database import url as DATABASE_URL
+
 
 # Importando de forma dinâmica
 def include_models_from_directory(directory: str):
@@ -18,27 +21,24 @@ def include_models_from_directory(directory: str):
     sys.path.append(os.getcwd())  # Garantir que o diretório atual está no PATH
     for filename in os.listdir(directory):
         if filename.endswith("_models.py"):
-            module_name_short = filename.replace('_models.py', '')
+            module_name_short = filename.replace("_models.py", "")
             module_name_full = f"models.{module_name_short}_models"
-            module_name_partial = f"{module_name_short}_models"
+            # module_name_partial = f"{module_name_short}_models"
 
-            #print("models filename: ", filename)
-            #print("models module_name_short: ", module_name_short)
-            #print("models module_name_partial: ", module_name_partial)
-            #print("models module_name_full: ", module_name_full)
+            # print("models filename: ", filename)
+            # print("models module_name_short: ", module_name_short)
+            # print("models module_name_partial: ", module_name_partial)
+            # print("models module_name_full: ", module_name_full)
 
             module = importlib.import_module(f".{module_name_full}", package="openvpc")
 
-            model_base = getattr(module, 'Base', None)
+            model_base = getattr(module, "Base", None)
             if model_base:
                 models.append(model_base)
     return models
 
+
 include_models_from_directory("models")
-
-
-# Importe DATABASE_URL de seu módulo de configuração de banco de dados
-from openvpc.database import DATABASE_URL_SYNC
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -46,7 +46,7 @@ config = context.config
 
 # Set a sqlalchemy.url no objeto de configuração do Alembic
 # para a URL do banco de dados importada de openvpc.database
-config.set_main_option("sqlalchemy.url", DATABASE_URL_SYNC)
+config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -59,7 +59,7 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 # Por enquanto, deixaremos como None, pois não sei os detalhes dos seus modelos.
 target_metadata = Base.metadata
-#target_metadata = [base.metadata for base in include_models_from_directory("models")]
+# target_metadata = [base.metadata for base in include_models_from_directory("models")]
 
 
 # other values from the config, defined by the needs of env.py,
@@ -106,9 +106,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

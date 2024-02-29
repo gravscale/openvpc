@@ -1,4 +1,4 @@
-import pprint
+from loguru import logger
 
 from .vyos import DeviceVyos
 
@@ -8,23 +8,29 @@ class DeviceFactory:
         self,
         type,
         host,
-        key,
-        protocol,
         port,
+        protocol,
+        username=None,
+        password=None,
+        private_key=None,
         verify=False,
         timeout=10,
     ):
-        print(f"DeviceFactory: {type} {protocol} {host} {port} {verify} {timeout}")
+        logger.debug(
+            f"Device_Factory: {type} {host} {port} {protocol} {username} {verify} {timeout}"
+        )
 
         if type == "vyos":
-            return DeviceVyos.instance(host, key, protocol, port, verify, timeout)
+            return DeviceVyos.instance(
+                host, port, protocol, username, password, private_key, verify, timeout
+            )
         else:
             raise ValueError(f"Unknown device type: {type}")
 
     def show(self, path):
         if hasattr(self, "device"):
             result = self.device.show(path)
-            pprint.pprint(result)
+            logger.debug(result)
             return result
         else:
             raise Exception("Device not instanced")

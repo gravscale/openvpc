@@ -28,7 +28,7 @@ run:
 mysql:
 	$(eval include dev/.env)
 	$(eval export $(shell sed 's/=.*//' dev/.env))
-	mysql -h $(MYSQL_HOSTNAME) -u $(MYSQL_USER) -p$(MYSQL_PASSWORD) $(MYSQL_DATABASE)
+	mysql -h $(MYSQL_HOST) -u $(MYSQL_USERNAME) -p$(MYSQL_PASSWORD) $(MYSQL_DATABASE)
 
 requirements:
 	poetry export -f requirements.txt --output requirements.txt

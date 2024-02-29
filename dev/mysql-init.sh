@@ -14,6 +14,6 @@ done
 mysql -h "localhost" -u "root" -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`;"
 
 # Cria o usuário e concede as permissões
-mysql -h "localhost" -u "root" -p"${MYSQL_ROOT_PASSWORD}" -e "GRANT ALL ON \`${MYSQL_DATABASE}\`.* TO '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}'; FLUSH PRIVILEGES;"
+mysql -h "localhost" -u "root" -p"${MYSQL_ROOT_PASSWORD}" -e "GRANT ALL ON \`${MYSQL_DATABASE}\`.* TO '${MYSQL_USERNAME}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}'; FLUSH PRIVILEGES;"
 
 

@@ -70,7 +70,7 @@ async def set_config(
         except IntegrityError:
             await session.rollback()
             raise HTTPException(
-                status_code=400, detail="Duplicate configuration for given param and scope_zone"
+                status_code=400, detail="Duplicated configuration for given param and scope_zone"
             )
         except Exception as e:
             await session.rollback()
