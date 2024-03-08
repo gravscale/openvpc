@@ -1,29 +1,54 @@
-.PHONY: help alembic-revision alembic-current alembic-history alembic-apply run guidelines
+.PHONY: help alembic-revision alembic-current alembic-history alembic-apply run test mysql requirements
 
 help:
 	@echo "Available commands:"
-	@echo "alembic-revision MESSAGE - Creates an Alembic revision with the specified message"
-	@echo "alembic-current - Shows the current Alembic revision"
-	@echo "alembic-history - Shows the history of Alembic revisions"
-	@echo "alembic-apply - Applies the latest Alembic revision"
-	@echo "run - Runs the Uvicorn server"
-	@echo "mysql - Connects to the MySQL database"
-	@echo "guidelines - Shows the contribution guidelines for OpenVPC"
+	@echo "run - Runs the Uvicorn server."
+	@echo "test - Runs the Pytest tests."
+	@echo "mysql - Connects to the MySQL database."
+	@echo "requirements - Exports the requirements to requirements.txt."
+	@echo "aerich-init TEXT - Init config file and generate root migrate location."
+	@echo "aerich-init-db - Generate schema and generate app migrate location."
+	@echo "aerich-migrate - Generate migrate changes file."
+	@echo "aerich-upgrade - Upgrade to specified version."
+	@echo "aerich-downgrade - Downgrade to specified version."
 
-alembic-revision:
-	cd openvpc && poetry run alembic revision --autogenerate -m "$(MESSAGE)"
+# @echo "alembic-revision MESSAGE - Creates an Alembic revision with the specified message"
+# @echo "alembic-current - Shows the current Alembic revision"
+# @echo "alembic-history - Shows the history of Alembic revisions"
+# @echo "alembic-apply - Applies the latest Alembic revision"
 
-alembic-current:
-	cd openvpc && poetry run alembic current
+# alembic-revision:
+# 	cd app && poetry run alembic revision --autogenerate -m "$(MESSAGE)"
 
-alembic-history:
-	cd openvpc && poetry run alembic history
+# alembic-current:
+# 	cd app && poetry run alembic current
 
-alembic-apply:
-	cd openvpc && poetry run alembic upgrade head
+# alembic-history:
+# 	cd app && poetry run alembic history
+
+# alembic-apply:
+# 	cd app && poetry run alembic upgrade head
+
+aerich-init:
+	poetry run aerich init -t $(TEXT)
+
+aerich-init-db:
+	poetry run aerich init-db
+
+aerich-migrate:
+	poetry run aerich migrate
+
+aerich-upgrade:
+	poetry run aerich upgrade
+
+aerich-downgrade:
+	poetry run aerich downgrade
 
 run:
-	cd openvpc && poetry run uvicorn openvpc.main:app --host 0.0.0.0 --port 8000 --reload
+	cd app && poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+test:
+	cd tests && poetry run pytest
 
 mysql:
 	$(eval include dev/.env)
