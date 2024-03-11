@@ -1,20 +1,20 @@
 from contextlib import asynccontextmanager
 
-import uvicorn
 from fastapi import FastAPI
 from loguru import logger
+from starlette.middleware.cors import CORSMiddleware
 
-from .config.bootstrap import init_app
-from .config.db import close_db, init_db
-from .config.routers import init_routers
+from .bootstrap import init_app
+from .config import get_settings
+from .database import close_db, init_db
+from .router import init_routers
+
+settings = get_settings()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.add("../log/openvpc_{time:YYYY-MM-DD}.log", level="INFO")
-
-    logger.info("Starting up routers...")
-    await init_routers(app)
 
     logger.info("Starting up database...")
     await init_db()
@@ -27,5 +27,13 @@ async def lifespan(app: FastAPI):
 
 app = init_app(lifespan)
 
-if __name__ == "__main__":
-    uvicorn.run("main:app", debug=True, reload=True, lifespan="on")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ORIGINS,
+    allow_origin_regex=settings.CORS_ORIGINS_REGEX,
+    allow_credentials=True,
+    allow_methods=("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"),
+    allow_headers=settings.CORS_HEADERS,
+)
+
+init_routers(app)

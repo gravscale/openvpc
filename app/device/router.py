@@ -2,8 +2,8 @@ from typing import List
 
 from fastapi import APIRouter, status
 
-from .crud import create_device, delete_device, get_device, list_devices, update_device
-from .schema import DeviceCreate, DeviceRead, DeviceUpdate
+from .service import create_device, delete_device, get_device, list_devices, update_device
+from .schemas import DeviceCreate, DeviceRead, DeviceUpdate
 
 router = APIRouter()
 

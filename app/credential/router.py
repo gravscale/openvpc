@@ -1,16 +1,16 @@
 from typing import List
-from uuid import UUID
 
 from fastapi import APIRouter, status
+from pydantic import UUID4
 
-from .crud import (
+from .schemas import CredentialCreate, CredentialRead, CredentialUpdate
+from .service import (
     create_credential,
     delete_credential,
     get_credential,
     list_credentials,
     update_credential,
 )
-from .schema import CredentialCreate, CredentialRead, CredentialUpdate
 
 router = APIRouter()
 
@@ -41,7 +41,7 @@ async def create_credential_endpoint(credential: CredentialCreate):
     response_model=CredentialRead,
     operation_id="admin-credential-get",
 )
-async def get_credential_endpoint(credential_id: UUID):
+async def get_credential_endpoint(credential_id: UUID4):
     """
     Retrieves a credential by its ID.
     """
@@ -51,7 +51,7 @@ async def get_credential_endpoint(credential_id: UUID):
 @router.put(
     "/{credential_id}", response_model=CredentialRead, operation_id="admin-credential-update"
 )
-async def update_credential_endpoint(credential_id: UUID, credential: CredentialUpdate):
+async def update_credential_endpoint(credential_id: UUID4, credential: CredentialUpdate):
     """
     Updates a specific credential.
     """
@@ -61,7 +61,7 @@ async def update_credential_endpoint(credential_id: UUID, credential: Credential
 @router.delete(
     "/{credential_id}", status_code=status.HTTP_204_NO_CONTENT, operation_id="admin-credential-del"
 )
-async def delete_credential_endpoint(credential_id: UUID):
+async def delete_credential_endpoint(credential_id: UUID4):
     """
     Deletes a specific credential.
     """

@@ -3,18 +3,18 @@ import asyncio
 import pytest
 from fastapi.testclient import TestClient
 
-from app.config.bootstrap import init_app
-from app.config.db import close_db, init_db
-from app.config.routers import init_routers
-from app.config.settings import get_settings
+from app.bootstrap import init_app
+from app.config import get_settings
+from app.database import close_db, init_test_db
+from app.router import init_routers
 
 settings = get_settings()
 settings.TESTING = True
 
 
 def start_all_inits(app):
-    asyncio.run(init_routers(app))
-    asyncio.run(init_db())
+    init_routers(app)
+    asyncio.run(init_test_db())
 
 
 def close_all_inits():

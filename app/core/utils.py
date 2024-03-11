@@ -1,11 +1,13 @@
-from uuid import UUID
+import re
+import unicodedata
 
-from fastapi import HTTPException
 
-
-# Helper function to validate UUID format
-async def validate_uuid(uuid_str: str):
-    try:
-        UUID(uuid_str)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid UUID format.")
+def slugify(value):
+    """
+    Convert to ASCII. Convert spaces to hyphens.
+    Remove characters that aren't alphanumerics, underscores, or hyphens.
+    Convert to lowercase. Also strip leading and trailing whitespace.
+    """
+    value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
+    value = re.sub("[^\w\s-]", "", value).strip().lower()
+    return re.sub("[-\s]+", "-", value)

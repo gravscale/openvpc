@@ -124,6 +124,7 @@ celerybeat.pid
 .env.hml
 .env.prd
 .venv
+.venv/
 env/
 venv/
 ENV/

@@ -1,6 +1,6 @@
 from loguru import logger
 
-from ..services.vyos import DeviceVyos
+from ..core.device_vyos import DeviceVyos
 
 
 class DeviceFactory:
@@ -17,7 +17,7 @@ class DeviceFactory:
         timeout=10,
     ):
         logger.debug(
-            f"Device_Factory: {type} {host} {port} {protocol} {username} {verify} {timeout}"
+            f"DeviceFactory: {type} {host} {port} {protocol} {username} {verify} {timeout}"
         )
 
         if type == "vyos":

@@ -1,20 +1,41 @@
 from typing import List
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Depends, status
+from pydantic import UUID4
 
-from .crud import create_zone, list_zone
-from .schema import ZoneCreate, ZoneRead
+from .dependencies import valid_zone_create, valid_zone_get
+from .schemas import ZoneCreate, ZoneResponse
+from .service import create_zone, get_zone, list_zone
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[ZoneRead], operation_id="admin-zone-list")
+@router.get(
+    "",
+    response_model=List[ZoneResponse],
+    description="Lists all zones.",
+    operation_id="admin-zone-list",
+)
 async def list_zone_endpoint():
     return await list_zone()
 
 
-@router.post(
-    "", response_model=ZoneRead, status_code=status.HTTP_201_CREATED, operation_id="admin-zone-add"
+@router.get(
+    "/{zone_id}",
+    response_model=ZoneResponse,
+    description="Retrieves a zone by its ID.",
+    operation_id="admin-zone-get",
 )
-async def create_zone_endpoint(data: ZoneCreate):
+async def get_zone_endpoint(zone_id: UUID4 = Depends(valid_zone_get)):
+    return await get_zone(zone_id)
+
+
+@router.post(
+    "",
+    status_code=status.HTTP_201_CREATED,
+    response_model=ZoneResponse,
+    description="Creates a new zone.",
+    operation_id="admin-zone-add",
+)
+async def create_zone_endpoint(data: ZoneCreate = Depends(valid_zone_create)):
     return await create_zone(data)
