@@ -12,23 +12,6 @@ help:
 	@echo "aerich-upgrade - Upgrade to specified version."
 	@echo "aerich-downgrade - Downgrade to specified version."
 
-# @echo "alembic-revision MESSAGE - Creates an Alembic revision with the specified message"
-# @echo "alembic-current - Shows the current Alembic revision"
-# @echo "alembic-history - Shows the history of Alembic revisions"
-# @echo "alembic-apply - Applies the latest Alembic revision"
-
-# alembic-revision:
-# 	cd app && poetry run alembic revision --autogenerate -m "$(MESSAGE)"
-
-# alembic-current:
-# 	cd app && poetry run alembic current
-
-# alembic-history:
-# 	cd app && poetry run alembic history
-
-# alembic-apply:
-# 	cd app && poetry run alembic upgrade head
-
 aerich-init:
 	poetry run aerich init -t $(TEXT)
 

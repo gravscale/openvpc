@@ -2,7 +2,7 @@ from pydantic import UUID4
 from tortoise.exceptions import IntegrityError
 
 from ..core.netbox_service import NetboxService
-from .exceptions import ZoneCreateError
+from .exceptions import ZoneCreateError, ZoneNotFound
 from .models import Zone
 from .schemas import ZoneCreate, ZoneResponse
 
@@ -17,11 +17,13 @@ async def get_zone_by_name(name: str):
 
 async def list_zone():
     zones = await Zone.filter(is_active=True)
-    return [ZoneResponse.model_validate(i) for i in zones]
+    return [ZoneResponse.model_validate(zone) for zone in zones]
 
 
 async def get_zone(zone_id: UUID4):
     zone = await get_zone_by_id(zone_id)
+    if not zone:
+        raise ZoneNotFound()
     return ZoneResponse.model_validate(zone)
 
 

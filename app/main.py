@@ -4,7 +4,6 @@ from fastapi import FastAPI
 from loguru import logger
 from starlette.middleware.cors import CORSMiddleware
 
-from .bootstrap import init_app
 from .config import get_settings
 from .database import close_db, init_db
 from .router import init_routers
@@ -25,7 +24,7 @@ async def lifespan(app: FastAPI):
     await close_db()
 
 
-app = init_app(lifespan)
+app = FastAPI(lifespan=lifespan, title=settings.APP_NAME, root_path=settings.ROOT_PATH)
 
 app.add_middleware(
     CORSMiddleware,

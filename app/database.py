@@ -14,6 +14,7 @@ TORTOISE_ORM: dict = {
                 "app.zone.models",
                 "app.credential.models",
                 "app.device.models",
+                "app.configuration.models",
             ],
             "default_connection": "default",
         },
@@ -24,11 +25,8 @@ TORTOISE_ORM: dict = {
 async def init_db() -> None:
     await Tortoise.init(config=TORTOISE_ORM)
 
-
-async def init_test_db() -> None:
-    TORTOISE_ORM["connections"]["default"] = settings.DB_TEST_URL
-    await init_db()
-    await Tortoise.generate_schemas()
+    if settings.TESTING:
+        await Tortoise.generate_schemas()
 
 
 async def close_db() -> None:

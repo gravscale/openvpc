@@ -1,13 +1,14 @@
-from app.exceptions import BadRequest, NotFound
+from ..exceptions import BadRequest, NotFound
+from .constants import ErrorCode
 
 
 class ZoneNotFound(NotFound):
-    DETAIL = "Zone not found."
+    DETAIL = ErrorCode.ZONE_NOT_FOUND
 
 
-class ZoneNameAlreadyExists(BadRequest):
-    DETAIL = "Zone name already exists."
+class ZoneAlreadyExists(BadRequest):
+    DETAIL = ErrorCode.ZONE_ALREADY_EXISTS
 
 
 class ZoneCreateError(BadRequest):
-    DETAIL = "Zone create error."
+    DETAIL = ErrorCode.ZONE_CREATE_ERROR

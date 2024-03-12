@@ -7,16 +7,14 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-class Settings(BaseSettings):
+class Config(BaseSettings):
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", extra="ignore")
 
     APP_NAME: str = "openvpc"
     ROOT_PATH: str = ""
     ENVIRONMENT: str = "dev"
     TESTING: bool = False
-
     DATABASE_URL: str
-    DB_TEST_URL: str = "sqlite://:memory:"
 
     CORS_ORIGINS: list[str]
     CORS_ORIGINS_REGEX: str | None = None
@@ -33,4 +31,4 @@ class Settings(BaseSettings):
 @lru_cache()
 def get_settings():
     logger.info("Loading application config")
-    return Settings()
+    return Config()
