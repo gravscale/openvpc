@@ -1,20 +1,20 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import UUID4, BaseModel, ConfigDict, Field
 
 
-class VPCRequest(BaseModel):
-    primary_device_name: str
-    secondary_device_name: str
-    name: str
+class VpcCreate(BaseModel):
+    name: str = Field(..., description="Unique name for the vpc")
+    device_name_primary: str = Field(..., description="Primary device name")
+    device_name_secondary: str = Field(..., description="Secondary device name")
 
 
-class VPCRead(BaseModel):
+class VpcResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
-    name: str
-    device_name_primary: str
-    device_name_secondary: str
-    creation_datetime: datetime
-    status: bool
+    id: UUID4 = Field(..., description="Unique identifier for the vpc")
+    name: str = Field(..., description="Unique name for the vpc")
+    device_name_primary: str = Field(..., description="Primary device name")
+    device_name_secondary: str = Field(..., description="Secondary device name")
+    created_at: datetime = Field(..., description="Creation timestamp")
+    updated_at: datetime = Field(..., description="Last update timestamp")

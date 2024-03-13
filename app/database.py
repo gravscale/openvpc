@@ -15,6 +15,7 @@ TORTOISE_ORM: dict = {
                 "app.credential.models",
                 "app.device.models",
                 "app.configuration.models",
+                "app.vpc.models",
             ],
             "default_connection": "default",
         },

@@ -14,6 +14,10 @@ class RouterBase(BaseModel):
     deleted_at: Optional[datetime] = Field(None, description="Deletion timestamp")
     is_active: bool = Field(True, description="Active status of the router")
 
+
+class RouterCreate(RouterBase):
+    pass
+
     @field_validator("vpc_uuid", "vpc_name")
     def check_vpc_uuid_or_name(cls, v, info: ValidationInfo):
         if ("vpc_uuid" in info.data and "vpc_name" in info.data) or (
@@ -26,10 +30,6 @@ class RouterBase(BaseModel):
             except ValueError:
                 raise ValueError("Invalid UUID format for VPC")
         return v
-
-
-class RouterCreate(RouterBase):
-    pass
 
 
 class RouterUpdate(RouterBase):

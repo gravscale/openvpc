@@ -1,36 +1,28 @@
-from datetime import datetime
+from pydantic import UUID4
+from tortoise.exceptions import IntegrityError
 
-from fastapi import HTTPException
-from sqlalchemy.future import select
-
-from ..database import SessionLocal as AsyncSessionLocal
-from .models import VPC
-from .schemas import VPCRequest
+from .exceptions import VpcCreateError
+from .models import Vpc
+from .schemas import VpcCreate, VpcResponse
 
 
-async def get_vpc():
-    async with AsyncSessionLocal() as session:
-        try:
-            result = await session.execute(select(VPC))
-            vpc = result.scalars().all()
-            return vpc
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+async def get_vpc_by_name(vpc_name: str):
+    return await Vpc.get_or_none(name=vpc_name, is_active=True)
 
 
-async def add_vpc(vpc_request: VPCRequest):
-    async with AsyncSessionLocal() as session:
-        new_vpc = VPC(
-            name=vpc_request.name,
-            device_name_primary=vpc_request.primary_device_name,
-            device_name_secondary=vpc_request.secondary_device_name,
-            creation_datetime=datetime.now(),
-            status=True,
-        )
-        session.add(new_vpc)
-        try:
-            await session.commit()
-            return new_vpc
-        except Exception as e:
-            await session.rollback()
-            raise HTTPException(status_code=500, detail=str(e))
+async def list_vpc():
+    vpcs = await Vpc.filter(is_active=True)
+    return [VpcResponse.model_validate(vpc) for vpc in vpcs]
+
+
+async def get_vpc(vpc_id: UUID4):
+    return await Vpc.get_or_none(id=vpc_id, is_active=True)
+
+
+async def create_vpc(data: VpcCreate):
+    try:
+        vpc = await Vpc.create(**data.model_dump())
+    except IntegrityError:
+        raise VpcCreateError()
+
+    return VpcResponse.model_validate(vpc)

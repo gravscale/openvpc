@@ -17,8 +17,8 @@ from .schemas import DeviceCreate, DeviceRead, DeviceUpdate
 settings = get_settings()
 
 
-async def _get_obj(id_: UUID4):
-    device = await Device.get_or_none(id=id_, is_active=True)
+async def get_device_by_id(device_id: UUID4):
+    device = await Device.get_or_none(id=device_id, is_active=True)
     if not device:
         raise HTTPException(status_code=404, detail="Device not found.")
     return device
@@ -31,8 +31,8 @@ async def list_devices():
 
 
 # Async CRUD operation for retrieving a device
-async def get_device(id_: UUID4):
-    return DeviceRead.model_validate(_get_obj(id_))
+async def get_device(device_id: UUID4):
+    return DeviceRead.model_validate(await get_device_by_id(device_id))
 
 
 async def _validate_and_connect_device(data):
@@ -165,7 +165,7 @@ async def update_device(id_: UUID4, data: DeviceUpdate):
 
 # Async CRUD operation for deleting a device
 async def delete_device(id_: UUID4):
-    device = await _get_obj(id_)
+    device = await get_device_by_id(id_)
 
     # Tenta excluir o dispositivo no NetBox
     try:

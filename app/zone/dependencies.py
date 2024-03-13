@@ -3,7 +3,7 @@ from .schemas import ZoneCreate
 from .service import get_zone_by_name
 
 
-async def valid_zone_create(zone: ZoneCreate):
-    if await get_zone_by_name(zone.name):
+async def valid_zone_create(data: ZoneCreate):
+    if await get_zone_by_name(data.name):
         raise ZoneAlreadyExists()
-    return zone
+    return data

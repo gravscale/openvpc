@@ -4,9 +4,17 @@ from fastapi import FastAPI
 from loguru import logger
 from starlette.middleware.cors import CORSMiddleware
 
+from app.configuration import router as config_router
+from app.credential import router as credential_router
+from app.device import router as device_router
+from app.vpc import router as vpc_router
+from app.zone import router as zone_router
+
 from .config import get_settings
 from .database import close_db, init_db
-from .router import init_routers
+
+# from app.router import router as router_router
+
 
 settings = get_settings()
 
@@ -35,4 +43,15 @@ app.add_middleware(
     allow_headers=settings.CORS_HEADERS,
 )
 
-init_routers(app)
+
+@app.get("/healthcheck", include_in_schema=False)
+async def healthcheck() -> dict[str, str]:
+    return {"status": "ok"}
+
+
+app.include_router(credential_router.router, prefix="/admin/credential")
+app.include_router(zone_router.router, prefix="/admin/zone")
+app.include_router(device_router.router, prefix="/admin/device")
+app.include_router(config_router.router, prefix="/admin/configuration")
+# app.include_router(router_router.router, prefix="/router")
+app.include_router(vpc_router.router, prefix="/vpc")

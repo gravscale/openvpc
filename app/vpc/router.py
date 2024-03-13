@@ -1,18 +1,42 @@
 from typing import List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, status
+from pydantic import UUID4
 
-from .service import add_vpc, get_vpc
-from .schemas import VPCRead, VPCRequest
+from .dependencies import valid_vpc_create
+from .schemas import VpcCreate, VpcResponse
+from .service import create_vpc, get_vpc, list_vpc
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[VPCRead], operation_id="vpc-list")
+@router.get(
+    "",
+    response_model=List[VpcResponse],
+    description="Lists all VPCs.",
+    operation_id="vpc-list",
+)
 async def list_vpc_endpoint():
-    return await get_vpc()
+    return await list_vpc()
 
 
-@router.post("", response_model=VPCRead, operation_id="vpc-add")
-async def add_vpc_endpoint(vpc_request: VPCRequest):
-    return await add_vpc(vpc_request)
+@router.get(
+    "/{vpc_id}",
+    response_model=VpcResponse,
+    description="Retrieves a VPC by its ID.",
+    operation_id="vpc-get",
+)
+async def get_vpc_endpoint(vpc_id: UUID4):
+    return await get_vpc(vpc_id)
+
+
+@router.post(
+    "",
+    status_code=status.HTTP_201_CREATED,
+    response_model=VpcResponse,
+    dependencies=[Depends(valid_vpc_create)],
+    description="Creates a new VPC.",
+    operation_id="vpc-add",
+)
+async def create_vpc_endpoint(data: VpcCreate):
+    return await create_vpc(data)

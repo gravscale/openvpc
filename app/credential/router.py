@@ -15,12 +15,28 @@ from .service import (
 router = APIRouter()
 
 
-@router.get("", response_model=List[CredentialRead], operation_id="admin-credential-list")
+@router.get(
+    "",
+    response_model=List[CredentialRead],
+    operation_id="admin-credential-list",
+)
 async def list_credentials_endpoint():
     """
     Lists all credentials.
     """
     return await list_credentials()
+
+
+@router.get(
+    "/{credential_id}",
+    response_model=CredentialRead,
+    operation_id="admin-credential-get",
+)
+async def get_credential_endpoint(credential_id: UUID4):
+    """
+    Retrieves a credential by its ID.
+    """
+    return await get_credential(credential_id)
 
 
 @router.post(
@@ -36,20 +52,10 @@ async def create_credential_endpoint(credential: CredentialCreate):
     return await create_credential(credential)
 
 
-@router.get(
+@router.put(
     "/{credential_id}",
     response_model=CredentialRead,
-    operation_id="admin-credential-get",
-)
-async def get_credential_endpoint(credential_id: UUID4):
-    """
-    Retrieves a credential by its ID.
-    """
-    return await get_credential(credential_id)
-
-
-@router.put(
-    "/{credential_id}", response_model=CredentialRead, operation_id="admin-credential-update"
+    operation_id="admin-credential-update",
 )
 async def update_credential_endpoint(credential_id: UUID4, credential: CredentialUpdate):
     """
@@ -59,7 +65,9 @@ async def update_credential_endpoint(credential_id: UUID4, credential: Credentia
 
 
 @router.delete(
-    "/{credential_id}", status_code=status.HTTP_204_NO_CONTENT, operation_id="admin-credential-del"
+    "/{credential_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    operation_id="admin-credential-del",
 )
 async def delete_credential_endpoint(credential_id: UUID4):
     """
