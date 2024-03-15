@@ -11,11 +11,12 @@ TORTOISE_ORM: dict = {
         "models": {
             "models": [
                 "aerich.models",
-                "app.zone.models",
-                "app.credential.models",
-                "app.device.models",
-                "app.configuration.models",
-                "app.vpc.models",
+                "src.zone.models",
+                "src.credential.models",
+                "src.device.models",
+                "src.config_set.models",
+                "src.vpc.models",
+                "src.router.models",
             ],
             "default_connection": "default",
         },
@@ -26,7 +27,7 @@ TORTOISE_ORM: dict = {
 async def init_db() -> None:
     await Tortoise.init(config=TORTOISE_ORM)
 
-    if settings.TESTING:
+    if settings.ENVIRONMENT.is_testing:
         await Tortoise.generate_schemas()
 
 

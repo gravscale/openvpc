@@ -10,29 +10,32 @@ from ..config import get_settings
 from ..core.netbox_service import NetboxService
 from ..credential.models import Credential
 from ..zone.models import Zone
+from .exceptions import DeviceCreateError, DeviceDeleteError, DeviceNotFound
 from .factory import DeviceFactory
 from .models import Device
-from .schemas import DeviceCreate, DeviceRead, DeviceUpdate
+from .schemas import DeviceCreate, DeviceResponse, DeviceUpdate
 
 settings = get_settings()
 
 
 async def get_device_by_id(device_id: UUID4):
-    device = await Device.get_or_none(id=device_id, is_active=True)
-    if not device:
-        raise HTTPException(status_code=404, detail="Device not found.")
-    return device
+    return await Device.get_or_none(id=device_id, is_active=True)
 
 
-# Async CRUD operation for listing devices
-async def list_devices():
+async def get_device_by_name(name: str):
+    return await Device.get_or_none(name=name, is_active=True)
+
+
+async def list_device():
     devices = await Device.filter(is_active=True)
-    return [DeviceRead.model_validate(i) for i in devices]
+    return [DeviceResponse.model_validate(device) for device in devices]
 
 
-# Async CRUD operation for retrieving a device
 async def get_device(device_id: UUID4):
-    return DeviceRead.model_validate(await get_device_by_id(device_id))
+    zone = await get_device_by_id(device_id)
+    if not zone:
+        raise DeviceNotFound()
+    return DeviceResponse.model_validate(zone)
 
 
 async def _validate_and_connect_device(data):
@@ -91,11 +94,11 @@ async def _validate_and_connect_device(data):
 async def create_device(data: DeviceCreate):
     zone, _ = await _validate_and_connect_device(data)
 
-    # Tenta criar o dispositivo no NetBox
+    # Create the device in Netbox
     netbox_service = NetboxService()
 
     try:
-        device_netbox = netbox_service.create_device(
+        netbox_device = netbox_service.create_device(
             device_name=data.name,
             type_id=1,  # FIXME: device_data.device_type,
             site_id=zone.netbox_id,
@@ -103,33 +106,27 @@ async def create_device(data: DeviceCreate):
     except HTTPException as e:
         raise e
 
-    device_netbox_id = device_netbox["id"]
+    netbox_id = netbox_device["id"]
 
     device_dict = data.model_dump()
-    device_dict["zone_id"] = zone.id
-    device_dict["netbox_id"] = device_netbox_id
-
-    # Remoção de campos não presentes no modelo Device
-    device_dict.pop("zone_uuid", None)
-    device_dict.pop("zone_name", None)
+    device_dict["zone"] = zone
+    device_dict["netbox_id"] = netbox_id
 
     try:
         device = await Device.create(**device_dict)
     except IntegrityError:
-        # await session.rollback()
-
-        # Tenta remover o dispositivo criado no NetBox, se possível
+        # Delete the device from Netbox
         try:
-            await netbox_service.delete_device(device_netbox_id)
-        except Exception as e:
-            logger.warning(f"Failed to delete device from netbox {data.name}: {e}")
+            await netbox_service.delete_device(netbox_id)
+        except HTTPException as e:
+            logger.warning(f"Failed to delete device '{data.name}' from Netbox: {e}")
 
-        raise HTTPException(status_code=400, detail="Device create error.")
+        raise DeviceCreateError()
 
-    return DeviceRead.model_validate(device)
+    return DeviceResponse.model_validate(device)
 
 
-async def update_device(id_: UUID4, data: DeviceUpdate):
+async def update_device(device_id: UUID4, data: DeviceUpdate):
     pass
 
     # await validate_uuid(device_id)
@@ -164,19 +161,20 @@ async def update_device(id_: UUID4, data: DeviceUpdate):
 
 
 # Async CRUD operation for deleting a device
-async def delete_device(id_: UUID4):
-    device = await get_device_by_id(id_)
+async def delete_device(device_id: UUID4):
+    device = await get_device_by_id(device_id)
 
-    # Tenta excluir o dispositivo no NetBox
+    # Delete the device from Netbox
     try:
         NetboxService().delete_device(device.netbox_id)
     except HTTPException as e:
         raise e
 
+    # Delete the device in the database
     device.is_active = False
     device.deleted_at = datetime.now(timezone.utc)
 
     try:
         await device.save()
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="Device delete error.")
+        raise DeviceDeleteError()

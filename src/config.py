@@ -4,6 +4,8 @@ from pathlib import Path
 from loguru import logger
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from .constants import Environment
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -11,14 +13,16 @@ class Config(BaseSettings):
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", extra="ignore")
 
     APP_NAME: str = "openvpc"
+    APP_VERSION: str = "1"
     ROOT_PATH: str = ""
-    ENVIRONMENT: str = "dev"
-    TESTING: bool = False
+
     DATABASE_URL: str
 
+    ENVIRONMENT: Environment = Environment.LOCAL
+
+    CORS_HEADERS: list[str]
     CORS_ORIGINS: list[str]
     CORS_ORIGINS_REGEX: str | None = None
-    CORS_HEADERS: list[str]
 
     # Netbox
     NETBOX_URL: str

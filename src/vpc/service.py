@@ -6,8 +6,12 @@ from .models import Vpc
 from .schemas import VpcCreate, VpcResponse
 
 
-async def get_vpc_by_name(vpc_name: str):
-    return await Vpc.get_or_none(name=vpc_name, is_active=True)
+async def get_vpc_by_id(vpc_id: UUID4):
+    return await Vpc.get_or_none(id=vpc_id, is_active=True)
+
+
+async def get_vpc_by_name(name: str):
+    return await Vpc.get_or_none(name=name, is_active=True)
 
 
 async def list_vpc():

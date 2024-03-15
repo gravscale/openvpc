@@ -1,4 +1,4 @@
-.PHONY: help alembic-revision alembic-current alembic-history alembic-apply run test mysql requirements
+.PHONY: help run test mysql requirements aerich-init aerich-init-db aerich-migrate aerich-upgrade aerich-downgrade
 
 help:
 	@echo "Available commands:"
@@ -11,6 +11,20 @@ help:
 	@echo "aerich-migrate - Generate migrate changes file."
 	@echo "aerich-upgrade - Upgrade to specified version."
 	@echo "aerich-downgrade - Downgrade to specified version."
+
+run:
+	poetry run uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload --proxy-headers
+
+test:
+	poetry run pytest
+
+mysql:
+	$(eval include .env)
+	$(eval export $(shell sed 's/=.*//' .env))
+	mysql -h $(MYSQL_HOST) -u $(MYSQL_USERNAME) -p$(MYSQL_PASSWORD) $(MYSQL_DATABASE)
+
+requirements:
+	poetry export -f requirements.txt --output requirements.txt --without-hashes --without-urls
 
 aerich-init:
 	poetry run aerich init -t $(TEXT)
@@ -26,17 +40,3 @@ aerich-upgrade:
 
 aerich-downgrade:
 	poetry run aerich downgrade
-
-run:
-	cd app && poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-
-test:
-	cd tests && poetry run pytest
-
-mysql:
-	$(eval include dev/.env)
-	$(eval export $(shell sed 's/=.*//' dev/.env))
-	mysql -h $(MYSQL_HOST) -u $(MYSQL_USERNAME) -p$(MYSQL_PASSWORD) $(MYSQL_DATABASE)
-
-requirements:
-	poetry export -f requirements.txt --output requirements.txt

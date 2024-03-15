@@ -3,8 +3,8 @@ from dataclasses import dataclass
 import pytest
 from faker import Faker
 
-from app.core.device_vyos import DeviceVyos
-from app.core.netbox_service import NetboxService
+from src.core.device_vyos import DeviceVyos
+from src.core.netbox_service import NetboxService
 
 fake = Faker()  # "pt_BR"
 
@@ -33,8 +33,8 @@ def create_device(client, create_credential, create_zone, mock_monkeypatch):
         "host": fake.ipv4_private(),
         "port": 8080,
         "protocol": "https",
-        "credential_id": create_credential.json()["id"],
-        "zone_id": create_zone.json()["id"],
+        "credential_id": create_credential.json().get("id"),
+        "zone_id": create_zone.json().get("id"),
     }
     return client.post("/admin/device/", json=data)
 
@@ -45,7 +45,7 @@ def create_config(client, create_zone):
         "param": fake.word(),
         "value": fake.word(),
         "format": "string",
-        "scope_zone_id": create_zone.json()["id"],
+        "scope_zone_id": create_zone.json().get("id"),
     }
     return client.post("/admin/configuration/", json=data)
 
@@ -58,6 +58,15 @@ def create_vpc(client):
         "device_name_secondary": fake.name(),
     }
     return client.post("/vpc/", json=data)
+
+
+@pytest.fixture
+def create_router(client, create_vpc):
+    data = {
+        "name": fake.name(),
+        "vpc_id": create_vpc.json().get("id"),
+    }
+    return client.post("/router/", json=data)
 
 
 @pytest.fixture

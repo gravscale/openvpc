@@ -4,7 +4,7 @@ from ..zone.exceptions import ZoneNotFound
 from ..zone.service import get_zone_by_id, get_zone_by_name
 from .exceptions import ConfigCreateError, ConfigNotFound
 from .models import Config
-from .schemas import ConfigResponse, ConfigSetRequest
+from .schemas import ConfigSetCreate, ConfigSetResponse
 
 
 async def get_config_by_param(param: str):
@@ -13,17 +13,17 @@ async def get_config_by_param(param: str):
 
 async def list_config():
     configs = await Config.all()
-    return [ConfigResponse.model_validate(config) for config in configs]
+    return [ConfigSetResponse.model_validate(config) for config in configs]
 
 
 async def get_config(param: str):
     config = await get_config_by_param(param)
     if not config:
         raise ConfigNotFound()
-    return ConfigResponse.model_validate(config)
+    return ConfigSetResponse.model_validate(config)
 
 
-async def set_config(config_set: ConfigSetRequest):
+async def set_config(config_set: ConfigSetCreate):
     scope_zone = None
 
     if config_set.scope_zone_id or config_set.scope_zone_name:
@@ -41,4 +41,4 @@ async def set_config(config_set: ConfigSetRequest):
     except IntegrityError:
         raise ConfigCreateError()
 
-    return ConfigResponse.model_validate(config)
+    return ConfigSetResponse.model_validate(config)

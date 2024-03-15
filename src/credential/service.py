@@ -24,7 +24,7 @@ async def list_credentials():
 
 # Async CRUD operation for retrieving a credential
 async def get_credential(credential_id: UUID4):
-    return CredentialRead.model_validate(_get_obj(credential_id))
+    return CredentialRead.model_validate(await _get_obj(credential_id))
 
 
 # Async CRUD operation for creating a credential

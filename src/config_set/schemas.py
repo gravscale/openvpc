@@ -13,6 +13,7 @@ from pydantic import (
 )
 
 from ..core.utils import slugify
+from .constants import ErrorCode
 
 
 class Format(str, Enum):
@@ -28,11 +29,11 @@ class ConfigSetBase(BaseModel):
     scope_zone_name: Optional[str] = Field(default=None, description="Name of the associated zone")
 
 
-class ConfigSetRequest(ConfigSetBase):
+class ConfigSetCreate(ConfigSetBase):
     @model_validator(mode="after")
     def check_scope(self):
         if self.scope_zone_id and self.scope_zone_name:
-            raise ValueError("Provide either zone_id or zone_name, not both.")
+            raise ValueError(ErrorCode.CONFIG_SCOPE_ERROR)
         return self
 
     @model_validator(mode="after")
@@ -41,7 +42,7 @@ class ConfigSetRequest(ConfigSetBase):
             try:
                 json.loads(self.value)
             except json.JSONDecodeError:
-                raise ValueError("Invalid JSON format.")
+                raise ValueError(ErrorCode.CONFIG_JSON_FORMAT_ERROR)
         return self
 
     @field_validator("param")
@@ -50,7 +51,7 @@ class ConfigSetRequest(ConfigSetBase):
         return slugify(v)
 
 
-class ConfigResponse(ConfigSetBase):
+class ConfigSetResponse(ConfigSetBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID4 = Field(..., description="Unique identifier for the config")

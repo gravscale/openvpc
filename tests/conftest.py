@@ -4,10 +4,10 @@ import pytest
 from fastapi.testclient import TestClient
 from starlette.config import environ
 
-environ["TESTING"] = "True"
+environ["ENVIRONMENT"] = "TESTING"
 environ["DATABASE_URL"] = "sqlite://:memory:"
 
-from app.main import app  # noqa
+from src.main import app  # noqa
 
 pytest_plugins = ["tests.fixtures"]
 
