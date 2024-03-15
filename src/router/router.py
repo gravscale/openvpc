@@ -40,18 +40,16 @@ async def get_router_endpoint(router_id: UUID4):
     "",
     response_model=RouterResponse,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(valid_router_create)],
     description="Creates a new router.",
     operation_id="router-add",
 )
-async def create_router_endpoint(data: RouterCreate):
+async def create_router_endpoint(data: RouterCreate = [Depends(valid_router_create)]):
     return await create_router(data)
 
 
 @router.put(
     "/{router_id}",
     response_model=RouterResponse,
-    dependencies=[Depends(valid_router_create)],
     description="Updates a specific router.",
     operation_id="router-update",
 )

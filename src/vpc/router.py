@@ -34,9 +34,8 @@ async def get_vpc_endpoint(vpc_id: UUID4):
     "",
     status_code=status.HTTP_201_CREATED,
     response_model=VpcResponse,
-    dependencies=[Depends(valid_vpc_create)],
     description="Creates a new VPC.",
     operation_id="vpc-add",
 )
-async def create_vpc_endpoint(data: VpcCreate):
+async def create_vpc_endpoint(data: VpcCreate = [Depends(valid_vpc_create)]):
     return await create_vpc(data)

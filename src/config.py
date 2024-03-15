@@ -1,16 +1,13 @@
 from functools import lru_cache
-from pathlib import Path
 
 from loguru import logger
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .constants import Environment
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 class Config(BaseSettings):
-    model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     APP_NAME: str = "openvpc"
     APP_VERSION: str = "1"

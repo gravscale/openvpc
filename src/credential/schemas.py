@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import UUID4, BaseModel, ConfigDict, Field, field_validator
-from pydantic_core.core_schema import ValidationInfo
+from pydantic import UUID4, BaseModel, ConfigDict, Field, model_validator
+
+from .constants import ErrorCode
 
 
 class CredentialBase(BaseModel):
@@ -11,26 +12,22 @@ class CredentialBase(BaseModel):
     password: Optional[str] = Field(None, description="Password if applicable")
     private_key: Optional[str] = Field(None, description="Private key if applicable")
 
-    @field_validator("private_key", "password")
-    def check_either_private_key_or_password(cls, v, info: ValidationInfo):
-        if "private_key" in info.data and "password" in info.data:
-            raise ValueError("Provide either private_key or password, not both")
-        return v
-
 
 class CredentialCreate(CredentialBase):
+    @model_validator(mode="after")
+    def check_either_private_key_or_password(self):
+        if self.password and self.private_key:
+            raise ValueError(ErrorCode.PRIVATE_KEY_AND_PASSWORD_PROVIDED)
+        return self
+
+
+class CredentialUpdate(CredentialCreate):
     pass
 
 
-class CredentialUpdate(CredentialBase):
-    pass
-
-
-class CredentialRead(CredentialBase):
+class CredentialResponse(CredentialBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID4 = Field(..., description="Unique identifier for the credential")
-    is_active: bool = Field(True, description="Active status of the credential")
-    created_at: Optional[datetime] = Field(None, description="Creation timestamp")
-    updated_at: Optional[datetime] = Field(None, description="Last update timestamp")
-    deleted_at: Optional[datetime] = Field(None, description="Deletion timestamp")
+    created_at: datetime = Field(..., description="Creation timestamp")
+    updated_at: datetime = Field(..., description="Last update timestamp")

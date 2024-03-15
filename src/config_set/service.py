@@ -23,21 +23,21 @@ async def get_config(param: str):
     return ConfigSetResponse.model_validate(config)
 
 
-async def set_config(config_set: ConfigSetCreate):
+async def config_create(data: ConfigSetCreate):
     scope_zone = None
 
-    if config_set.scope_zone_id or config_set.scope_zone_name:
-        if config_set.scope_zone_id:
-            scope_zone = await get_zone_by_id(config_set.scope_zone_id)
+    if data.scope_zone_id or data.scope_zone_name:
+        if data.scope_zone_id:
+            scope_zone = await get_zone_by_id(data.scope_zone_id)
 
-        elif config_set.scope_zone_name:
-            scope_zone = await get_zone_by_name(config_set.scope_zone_name)
+        elif data.scope_zone_name:
+            scope_zone = await get_zone_by_name(data.scope_zone_name)
 
         if not scope_zone:
             raise ZoneNotFound()
 
     try:
-        config = await Config.create(scope_zone=scope_zone, **config_set.model_dump())
+        config = await Config.create(scope_zone=scope_zone, **data.model_dump())
     except IntegrityError:
         raise ConfigCreateError()
 

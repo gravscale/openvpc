@@ -34,9 +34,8 @@ async def get_zone_endpoint(zone_id: UUID4):
     "",
     status_code=status.HTTP_201_CREATED,
     response_model=ZoneResponse,
-    dependencies=[Depends(valid_zone_create)],
     description="Creates a new zone.",
     operation_id="admin-zone-add",
 )
-async def create_zone_endpoint(data: ZoneCreate):
+async def create_zone_endpoint(data: ZoneCreate = [Depends(valid_zone_create)]):
     return await create_zone(data)

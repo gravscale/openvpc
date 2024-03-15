@@ -31,9 +31,9 @@ class ConfigSetBase(BaseModel):
 
 class ConfigSetCreate(ConfigSetBase):
     @model_validator(mode="after")
-    def check_scope(self):
+    def check_scope_zone(self):
         if self.scope_zone_id and self.scope_zone_name:
-            raise ValueError(ErrorCode.CONFIG_SCOPE_ERROR)
+            raise ValueError(ErrorCode.ZONE_ID_AND_NAME_PROVIDED)
         return self
 
     @model_validator(mode="after")
@@ -42,7 +42,7 @@ class ConfigSetCreate(ConfigSetBase):
             try:
                 json.loads(self.value)
             except json.JSONDecodeError:
-                raise ValueError(ErrorCode.CONFIG_JSON_FORMAT_ERROR)
+                raise ValueError(ErrorCode.INVALID_JSON_FORMAT)
         return self
 
     @field_validator("param")

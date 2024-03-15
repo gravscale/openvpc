@@ -16,3 +16,7 @@ class DeviceCreateError(BadRequest):
 
 class DeviceDeleteError(BadRequest):
     DETAIL = ErrorCode.DEVICE_DELETE_ERROR
+
+
+class DeviceUnableToConnect(BadRequest):
+    DETAIL = ErrorCode.DEVICE_UNABLE_TO_CONNECT

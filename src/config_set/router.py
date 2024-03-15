@@ -2,9 +2,9 @@ from typing import List
 
 from fastapi import APIRouter, Depends, status
 
-from .dependencies import valid_config_set
+from .dependencies import valid_config_create
 from .schemas import ConfigSetCreate, ConfigSetResponse
-from .service import get_config, list_config, set_config
+from .service import config_create, get_config, list_config
 
 router = APIRouter()
 
@@ -33,9 +33,8 @@ async def get_config_endpoint(param: str):
     "",
     status_code=status.HTTP_201_CREATED,
     response_model=ConfigSetResponse,
-    dependencies=[Depends(valid_config_set)],
     description="Sets a config.",
     operation_id="admin-config-set",
 )
-async def set_config_endpoint(config_set: ConfigSetCreate):
-    return await set_config(config_set)
+async def config_create_endpoint(data: ConfigSetCreate = [Depends(valid_config_create)]):
+    return await config_create(data)
