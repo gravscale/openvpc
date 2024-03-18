@@ -16,7 +16,7 @@ run:
 	poetry run uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload --proxy-headers
 
 test:
-	poetry run pytest
+	poetry run pytest -v .
 
 mysql:
 	$(eval include .env)

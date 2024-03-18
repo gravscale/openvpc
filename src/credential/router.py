@@ -43,10 +43,8 @@ async def get_credential_endpoint(credential_id: UUID4):
     description="Creates a new credential.",
     operation_id="admin-credential-add",
 )
-async def create_credential_endpoint(
-    credential: CredentialCreate = [Depends(valid_credential_create)],
-):
-    return await create_credential(credential)
+async def create_credential_endpoint(data: CredentialCreate = Depends(valid_credential_create)):
+    return await create_credential(data)
 
 
 @router.put(
@@ -55,8 +53,8 @@ async def create_credential_endpoint(
     description="Updates a specific credential.",
     operation_id="admin-credential-update",
 )
-async def update_credential_endpoint(credential_id: UUID4, credential: CredentialUpdate):
-    return await update_credential(credential_id, credential)
+async def update_credential_endpoint(credential_id: UUID4, data: CredentialUpdate):
+    return await update_credential(credential_id, data)
 
 
 @router.delete(

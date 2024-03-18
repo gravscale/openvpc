@@ -1,6 +1,5 @@
-from ..credential.exceptions import CredentialNotFound
 from ..credential.service import get_credential_by_id
-from .exceptions import DeviceAlreadyExists, DeviceUnableToConnect
+from .exceptions import CredentialNotFound, DeviceAlreadyExists, DeviceUnableToConnect
 from .factory import DeviceFactory
 from .schemas import DeviceCreate
 from .service import get_device_by_name

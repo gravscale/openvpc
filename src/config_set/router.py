@@ -36,5 +36,5 @@ async def get_config_endpoint(param: str):
     description="Sets a config.",
     operation_id="admin-config-set",
 )
-async def config_create_endpoint(data: ConfigSetCreate = [Depends(valid_config_create)]):
+async def config_create_endpoint(data: ConfigSetCreate = Depends(valid_config_create)):
     return await config_create(data)

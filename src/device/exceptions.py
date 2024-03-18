@@ -1,4 +1,6 @@
+from ..credential.constants import ErrorCode as CredentialErrorCode
 from ..exceptions import BadRequest, NotFound
+from ..zone.constants import ErrorCode as ZoneErrorCode
 from .constants import ErrorCode
 
 
@@ -20,3 +22,11 @@ class DeviceDeleteError(BadRequest):
 
 class DeviceUnableToConnect(BadRequest):
     DETAIL = ErrorCode.DEVICE_UNABLE_TO_CONNECT
+
+
+class ZoneNotFound(BadRequest):
+    DETAIL = ZoneErrorCode.ZONE_NOT_FOUND
+
+
+class CredentialNotFound(BadRequest):
+    DETAIL = CredentialErrorCode.CREDENTIAL_NOT_FOUND

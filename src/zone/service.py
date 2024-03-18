@@ -4,7 +4,7 @@ from tortoise.exceptions import IntegrityError
 from ..core.netbox_service import NetboxService
 from .exceptions import ZoneCreateError, ZoneNotFound
 from .models import Zone
-from .schemas import ZoneCreate, ZoneResponse
+from .schemas import ZoneCreate
 
 
 async def get_zone_by_id(zone_id: UUID4):
@@ -16,15 +16,14 @@ async def get_zone_by_name(name: str):
 
 
 async def list_zone():
-    zones = await Zone.filter(is_active=True)
-    return [ZoneResponse.model_validate(zone) for zone in zones]
+    return await Zone.filter(is_active=True)
 
 
 async def get_zone(zone_id: UUID4):
     zone = await get_zone_by_id(zone_id)
     if not zone:
         raise ZoneNotFound()
-    return ZoneResponse.model_validate(zone)
+    return zone
 
 
 async def create_zone(data: ZoneCreate):
@@ -43,4 +42,4 @@ async def create_zone(data: ZoneCreate):
     except IntegrityError:
         raise ZoneCreateError()
 
-    return ZoneResponse.model_validate(zone)
+    return zone

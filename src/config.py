@@ -31,5 +31,5 @@ class Config(BaseSettings):
 
 @lru_cache()
 def get_settings():
-    logger.info("Loading application config")
+    logger.info("Loading application config.")
     return Config()

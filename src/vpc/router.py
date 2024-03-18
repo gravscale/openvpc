@@ -37,5 +37,5 @@ async def get_vpc_endpoint(vpc_id: UUID4):
     description="Creates a new VPC.",
     operation_id="vpc-add",
 )
-async def create_vpc_endpoint(data: VpcCreate = [Depends(valid_vpc_create)]):
+async def create_vpc_endpoint(data: VpcCreate = Depends(valid_vpc_create)):
     return await create_vpc(data)

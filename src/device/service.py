@@ -7,11 +7,15 @@ from tortoise.exceptions import IntegrityError
 
 from ..config import get_settings
 from ..core.netbox_service import NetboxService
-from ..zone.exceptions import ZoneNotFound
 from ..zone.service import get_zone_by_id, get_zone_by_name
-from .exceptions import DeviceCreateError, DeviceDeleteError, DeviceNotFound
+from .exceptions import (
+    DeviceCreateError,
+    DeviceDeleteError,
+    DeviceNotFound,
+    ZoneNotFound,
+)
 from .models import Device
-from .schemas import DeviceCreate, DeviceResponse, DeviceUpdate
+from .schemas import DeviceCreate, DeviceUpdate
 
 settings = get_settings()
 
@@ -25,15 +29,14 @@ async def get_device_by_name(name: str):
 
 
 async def list_device():
-    devices = await Device.filter(is_active=True)
-    return [DeviceResponse.model_validate(device) for device in devices]
+    return await Device.filter(is_active=True)
 
 
 async def get_device(device_id: UUID4):
-    zone = await get_device_by_id(device_id)
-    if not zone:
+    device = await get_device_by_id(device_id)
+    if not device:
         raise DeviceNotFound()
-    return DeviceResponse.model_validate(zone)
+    return device
 
 
 async def create_device(data: DeviceCreate):
@@ -69,7 +72,7 @@ async def create_device(data: DeviceCreate):
 
         raise DeviceCreateError()
 
-    return DeviceResponse.model_validate(device)
+    return device
 
 
 async def update_device(device_id: UUID4, data: DeviceUpdate):

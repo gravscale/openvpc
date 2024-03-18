@@ -14,7 +14,7 @@ def test_get_device_should_return_200(client, create_device):
     assert response.json().get("id") == device_id
 
 
-def test_delete_device_should_return_204(client, create_device):
+def test_delete_device_should_return_204(client, create_device, mock_monkeypatch):
     device_id = create_device.json().get("id")
     response = client.delete(f"/admin/device/{device_id}")
     assert response.status_code == status.HTTP_204_NO_CONTENT

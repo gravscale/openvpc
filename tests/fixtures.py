@@ -10,7 +10,7 @@ fake = Faker()  # "pt_BR"
 
 
 @pytest.fixture
-def create_zone(client):
+def create_zone(client, mock_monkeypatch):
     data = {"name": fake.name()}
     return client.post("/admin/zone/", json=data)
 

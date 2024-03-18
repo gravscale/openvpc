@@ -6,7 +6,7 @@ from tortoise.exceptions import IntegrityError
 from ..config import get_settings
 from .exceptions import CredentialCreateError, CredentialDeleteError, CredentialNotFound
 from .models import Credential
-from .schemas import CredentialCreate, CredentialResponse, CredentialUpdate
+from .schemas import CredentialCreate, CredentialUpdate
 
 settings = get_settings()
 
@@ -20,15 +20,14 @@ async def get_credential_by_name(name: UUID4):
 
 
 async def list_credential():
-    credentials = await Credential.filter(is_active=True)
-    return [CredentialResponse.model_validate(i) for i in credentials]
+    return await Credential.filter(is_active=True)
 
 
 async def get_credential(credential_id: UUID4):
     credential = await get_credential_by_id(credential_id)
     if not credential:
         raise CredentialNotFound()
-    return CredentialResponse.model_validate(credential)
+    return credential
 
 
 async def create_credential(data: CredentialCreate):
@@ -37,7 +36,7 @@ async def create_credential(data: CredentialCreate):
     except IntegrityError:
         raise CredentialCreateError()
 
-    return CredentialResponse.model_validate(credential)
+    return credential
 
 
 async def update_credential(credential_id: UUID4, data: CredentialUpdate):

@@ -1,4 +1,5 @@
 from ..exceptions import BadRequest, NotFound
+from ..zone.constants import ErrorCode as ZoneErrorCode
 from .constants import ErrorCode
 
 
@@ -12,3 +13,7 @@ class ConfigAlreadyExists(BadRequest):
 
 class ConfigCreateError(BadRequest):
     DETAIL = ErrorCode.CONFIG_CREATE_ERROR
+
+
+class ZoneNotFound(BadRequest):
+    DETAIL = ZoneErrorCode.ZONE_NOT_FOUND

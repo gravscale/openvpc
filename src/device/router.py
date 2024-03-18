@@ -43,7 +43,7 @@ async def get_device_endpoint(device_id: UUID4):
     description="Creates a new device.",
     operation_id="admin-device-add",
 )
-async def create_device_endpoint(data: DeviceCreate = [Depends(valid_device_create)]):
+async def create_device_endpoint(data: DeviceCreate = Depends(valid_device_create)):
     return await create_device(data)
 
 

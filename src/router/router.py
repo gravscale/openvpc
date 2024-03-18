@@ -43,7 +43,7 @@ async def get_router_endpoint(router_id: UUID4):
     description="Creates a new router.",
     operation_id="router-add",
 )
-async def create_router_endpoint(data: RouterCreate = [Depends(valid_router_create)]):
+async def create_router_endpoint(data: RouterCreate = Depends(valid_router_create)):
     return await create_router(data)
 
 
