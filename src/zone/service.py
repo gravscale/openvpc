@@ -38,7 +38,7 @@ async def create_zone(data: ZoneCreate):
 
     # Create the zone in the database
     try:
-        zone = await Zone.create(netbox_id=netbox_id, **data.model_dump())
+        zone = await Zone.create(**data.model_dump(), netbox_id=netbox_id)
     except IntegrityError:
         raise ZoneCreateError()
 

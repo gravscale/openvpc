@@ -20,7 +20,7 @@ logger.add("../log/openvpc_{time:YYYY-MM-DD}.log", level="INFO")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting up database...")
-    await init_db()
+    await init_db(app)
 
     yield
 
@@ -35,6 +35,7 @@ app = FastAPI(
     root_path=settings.ROOT_PATH,
     debug=settings.ENVIRONMENT.is_debug,
 )
+
 
 app.add_middleware(
     CORSMiddleware,

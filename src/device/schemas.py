@@ -16,7 +16,7 @@ class DeviceBase(BaseModel):
 
 
 class DeviceCreate(DeviceBase):
-    zone_id: Optional[UUID4] = Field(None, description="UUID of the associated zone")
+    zone_id: Optional[UUID4] = Field(None, description="ID of the associated zone")
     zone_name: Optional[str] = Field(None, description="Name of the associated zone")
 
     @model_validator(mode="after")
@@ -38,6 +38,6 @@ class DeviceResponse(DeviceBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID4 = Field(..., description="Unique identifier for the device")
-    zone_id: UUID4 = Field(..., description="UUID of the associated zone")
+    zone_id: UUID4 = Field(..., description="ID of the associated zone")
     created_at: datetime = Field(..., description="Creation timestamp")
     updated_at: datetime = Field(..., description="Last update timestamp")

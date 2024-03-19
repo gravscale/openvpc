@@ -1,3 +1,4 @@
+from fastapi import FastAPI
 from tortoise import Tortoise
 
 from .config import get_settings
@@ -24,7 +25,7 @@ TORTOISE_ORM: dict = {
 }
 
 
-async def init_db() -> None:
+async def init_db(app: FastAPI) -> None:
     await Tortoise.init(config=TORTOISE_ORM)
 
     if settings.ENVIRONMENT.is_testing:

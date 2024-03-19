@@ -34,6 +34,7 @@ async def get_router(router_id: UUID4):
 
 
 async def create_router(data: RouterCreate):
+    dump = data.model_dump()
     vpc = None
 
     if data.vpc_id or data.vpc_name:
@@ -46,8 +47,13 @@ async def create_router(data: RouterCreate):
         if not vpc:
             raise VpcNotFound()
 
+        dump["vpc"] = vpc
+
+    dump.pop("vpc_id")
+    dump.pop("vpc_name")
+
     try:
-        router = await Router.create(vpc=vpc, **data.model_dump())
+        router = await Router.create(**dump)
     except IntegrityError:
         raise RouterCreateError()
 

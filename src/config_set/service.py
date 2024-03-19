@@ -3,7 +3,7 @@ from tortoise.exceptions import IntegrityError
 from ..zone.service import get_zone_by_id, get_zone_by_name
 from .exceptions import ConfigCreateError, ConfigNotFound, ZoneNotFound
 from .models import Config
-from .schemas import ConfigSetCreate
+from .schemas import ConfigCreate
 
 
 async def get_config_by_param(param: str):
@@ -15,13 +15,14 @@ async def list_config():
 
 
 async def get_config(param: str):
-    config_set = await get_config_by_param(param)
-    if not config_set:
+    config = await get_config_by_param(param)
+    if not config:
         raise ConfigNotFound()
-    return config_set
+    return config
 
 
-async def config_create(data: ConfigSetCreate):
+async def config_create(data: ConfigCreate):
+    dump = data.model_dump()
     scope_zone = None
 
     if data.scope_zone_id or data.scope_zone_name:
@@ -34,9 +35,14 @@ async def config_create(data: ConfigSetCreate):
         if not scope_zone:
             raise ZoneNotFound()
 
+        dump["scope_zone"] = scope_zone
+
+    dump.pop("scope_zone_id")
+    dump.pop("scope_zone_name")
+
     try:
-        config_set = await Config.create(scope_zone=scope_zone, **data.model_dump())
+        config = await Config.create(**dump)
     except IntegrityError:
         raise ConfigCreateError()
 
-    return config_set
+    return config

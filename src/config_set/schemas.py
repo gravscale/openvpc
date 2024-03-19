@@ -21,7 +21,7 @@ class Format(str, Enum):
     json = "json"
 
 
-class ConfigSetBase(BaseModel):
+class ConfigBase(BaseModel):
     param: str = Field(..., description="Unique name for the config")
     value: str = Field(..., description="Value of the config")
     format: Format = Field(Format.string, description="Format of the value: string, json")
@@ -29,7 +29,7 @@ class ConfigSetBase(BaseModel):
     scope_zone_name: Optional[str] = Field(default=None, description="Name of the associated zone")
 
 
-class ConfigSetCreate(ConfigSetBase):
+class ConfigCreate(ConfigBase):
     @model_validator(mode="after")
     def check_scope_zone(self):
         if self.scope_zone_id and self.scope_zone_name:
@@ -51,7 +51,7 @@ class ConfigSetCreate(ConfigSetBase):
         return slugify(v)
 
 
-class ConfigSetResponse(ConfigSetBase):
+class ConfigResponse(ConfigBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID4 = Field(..., description="Unique identifier for the config")

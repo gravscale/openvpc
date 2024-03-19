@@ -48,11 +48,17 @@ async def create_device(data: DeviceCreate):
     if not zone:
         raise ZoneNotFound()
 
+    dump = data.model_dump()
+    dump["zone"] = zone
+    dump.pop("zone_id")
+    dump.pop("zone_name")
+
     # Create the device in Netbox
     netbox_service = NetboxService()
+
     try:
         netbox_device = netbox_service.create_device(
-            device_name=data.name,
+            name=data.name,
             type_id=1,  # FIXME: device_data.device_type,
             site_id=zone.netbox_id,
         )
@@ -60,13 +66,14 @@ async def create_device(data: DeviceCreate):
         raise e
 
     netbox_id = netbox_device["id"]
+    dump["netbox_id"] = netbox_id
 
     try:
-        device = await Device.create(zone=zone, netbox_id=netbox_id, **data.model_dump())
+        device = await Device.create(**dump)
     except IntegrityError:
         # Delete the device from Netbox in case of error
         try:
-            await netbox_service.delete_device(netbox_id)
+            netbox_service.delete_device(netbox_id)
         except HTTPException as e:
             logger.error(f"Failed to delete device '{data.name}' from Netbox: {e}")
 

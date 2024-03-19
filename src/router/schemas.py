@@ -8,7 +8,7 @@ from .constants import ErrorCode
 
 class RouterCreate(BaseModel):
     name: str = Field(..., description="Unique name for the router")
-    vpc_id: Optional[UUID4] = Field(None, description="UUID of the associated VPC")
+    vpc_id: Optional[UUID4] = Field(None, description="ID of the associated VPC")
     vpc_name: Optional[str] = Field(None, description="Name of the associated VPC")
 
     @model_validator(mode="after")
@@ -27,6 +27,6 @@ class RouterResponse(BaseModel):
 
     id: UUID4 = Field(..., description="Unique identifier for the router")
     name: str = Field(..., description="Unique name for the router")
-    vpc_id: Optional[UUID4] = Field(None, description="UUID of the associated VPC")
+    vpc_id: Optional[UUID4] = Field(None, description="ID of the associated VPC")
     created_at: datetime = Field(..., description="Creation timestamp")
     updated_at: datetime = Field(..., description="Last update timestamp")
