@@ -1,7 +1,8 @@
 from pydantic import UUID4
 from tortoise.exceptions import IntegrityError
 
-from ..core.netbox_service import NetboxService
+from ..netbox.schemas import NetboxSiteCreate
+from ..netbox.service import NetboxService
 from .exceptions import ZoneCreateError, ZoneNotFound
 from .models import Zone
 from .schemas import ZoneCreate
@@ -30,15 +31,16 @@ async def create_zone(data: ZoneCreate):
     # Create the zone in Netbox
     netbox_service = NetboxService()
     try:
-        netbox_zone = netbox_service.create_zone(name=data.name)
+        netbox_zone = netbox_service.create_site(NetboxSiteCreate(name=data.name))
     except Exception as e:
         raise e
 
-    netbox_id = netbox_zone["id"]
+    dump = data.model_dump()
+    dump["netbox_id"] = netbox_zone.id
 
     # Create the zone in the database
     try:
-        zone = await Zone.create(**data.model_dump(), netbox_id=netbox_id)
+        zone = await Zone.create(**dump)
     except IntegrityError:
         raise ZoneCreateError()
 

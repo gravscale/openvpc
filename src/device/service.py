@@ -6,7 +6,8 @@ from pydantic import UUID4
 from tortoise.exceptions import IntegrityError
 
 from ..config import get_settings
-from ..core.netbox_service import NetboxService
+from ..netbox.schemas import NetboxDeviceCreate
+from ..netbox.service import NetboxService
 from ..zone.service import get_zone_by_id, get_zone_by_name
 from .exceptions import (
     DeviceCreateError,
@@ -58,16 +59,20 @@ async def create_device(data: DeviceCreate):
 
     try:
         netbox_device = netbox_service.create_device(
-            name=data.name,
-            type_id=1,  # FIXME: device_data.device_type,
-            site_id=zone.netbox_id,
+            NetboxDeviceCreate(
+                name=data.name,
+                device_type=1,  # FIXME: device_data.device_type,
+                site=zone.netbox_id,
+                role=settings.NETBOX_DEVICE_ROLE,
+            )
         )
     except HTTPException as e:
         raise e
 
-    netbox_id = netbox_device["id"]
+    netbox_id = netbox_device.id
     dump["netbox_id"] = netbox_id
 
+    # Create the device in the database
     try:
         device = await Device.create(**dump)
     except IntegrityError:

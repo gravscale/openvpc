@@ -3,9 +3,6 @@ from dataclasses import dataclass
 import pytest
 from faker import Faker
 
-from src.core.device_vyos import DeviceVyos
-from src.core.netbox_service import NetboxService
-
 fake = Faker()  # "pt_BR"
 
 
@@ -54,14 +51,14 @@ def create_config(client, create_zone):
 def create_vpc(client):
     data = {
         "name": fake.name(),
-        "device_name_primary": fake.name(),
-        "device_name_secondary": fake.name(),
+        "primary_device_name": fake.name(),
+        "secondary_device_name": fake.name(),
     }
     return client.post("/vpc/", json=data)
 
 
 @pytest.fixture
-def create_router(client, create_vpc):
+def create_router(client, create_vpc, mock_monkeypatch):
     data = {
         "name": fake.name(),
         "vpc_id": create_vpc.json().get("id"),
@@ -70,26 +67,25 @@ def create_router(client, create_vpc):
 
 
 @pytest.fixture
-def response_pyvyos_device_show():
-    @dataclass
-    class ApiResponse:
-        error: str
+def mock_monkeypatch(monkeypatch):
+    from src.core.device_vyos import DeviceVyos
+    from src.netbox.schemas import NetboxDefaultResponse
+    from src.netbox.service import NetboxService
 
-    return ApiResponse(error=False)
-
-
-@pytest.fixture
-def mock_monkeypatch(monkeypatch, response_pyvyos_device_show):
     def mock_netbox_create(*args, **kwargs):
-        return {"id": fake.random_int()}
+        return NetboxDefaultResponse(id=fake.random_int())
 
     def mock_netbox_delete(*args, **kwargs):
         return None
 
     def mock_pyvyos_device_show(*args, **kwargs):
-        return response_pyvyos_device_show
+        @dataclass
+        class ApiResponse:
+            error: str
+
+        return ApiResponse(error=False)
 
     monkeypatch.setattr(NetboxService, "create_device", mock_netbox_create)
-    monkeypatch.setattr(NetboxService, "create_zone", mock_netbox_create)
     monkeypatch.setattr(NetboxService, "delete_device", mock_netbox_delete)
+    monkeypatch.setattr(NetboxService, "create_site", mock_netbox_create)
     monkeypatch.setattr(DeviceVyos, "show", mock_pyvyos_device_show)

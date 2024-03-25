@@ -3,16 +3,15 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from pydantic import (
+from pydantic import (  # field_validator,
     UUID4,
     BaseModel,
     ConfigDict,
     Field,
-    field_validator,
     model_validator,
 )
 
-from ..core.utils import slugify
+# from ..core.utils import slugify
 from .constants import ErrorCode
 
 
@@ -45,10 +44,10 @@ class ConfigCreate(ConfigBase):
                 raise ValueError(ErrorCode.INVALID_JSON_FORMAT)
         return self
 
-    @field_validator("param")
-    @classmethod
-    def slugify_param(cls, v: str):
-        return slugify(v)
+    # @field_validator("param")
+    # @classmethod
+    # def slugify_param(cls, v: str):
+    #     return slugify(v)
 
 
 class ConfigResponse(ConfigBase):

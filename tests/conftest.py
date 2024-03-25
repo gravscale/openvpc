@@ -9,7 +9,7 @@ environ["DATABASE_URL"] = "sqlite://:memory:"
 
 from src.main import app  # noqa
 
-pytest_plugins = ["tests.fixtures"]
+pytest_plugins = "tests.fixtures"
 
 
 @pytest.fixture(scope="session")

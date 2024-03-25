@@ -24,7 +24,8 @@ class Config(BaseSettings):
     # Netbox
     NETBOX_URL: str
     NETBOX_KEY: str
-    NETBOX_DEFAULT_DEVICE_ROLE: int = 4  # VPC
+    NETBOX_ROUTER_ROLE: int = 2  # router
+    NETBOX_DEVICE_ROLE: int = 4  # VPC
     NETBOX_DEFAULT_SITE_REGION: int = 2  # São Paulo - Brazil
     NETBOX_DEFAULT_SITE_GROUP: int = 1  # Datacluster - São Paulo - Brazil
 

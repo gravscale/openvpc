@@ -1,8 +1,13 @@
 from datetime import datetime, timezone
 
+from fastapi import HTTPException
+from loguru import logger
 from pydantic import UUID4
 from tortoise.exceptions import IntegrityError
 
+from ..config import get_settings
+from ..netbox.schemas import NetboxDeviceCreate
+from ..netbox.service import NetboxService
 from ..vpc.service import get_vpc_by_id, get_vpc_by_name
 from .exceptions import (
     RouterCreateError,
@@ -12,6 +17,8 @@ from .exceptions import (
 )
 from .models import Router
 from .schemas import RouterCreate, RouterUpdate
+
+settings = get_settings()
 
 
 async def get_router_by_id(router_id: UUID4):
@@ -52,9 +59,34 @@ async def create_router(data: RouterCreate):
     dump.pop("vpc_id")
     dump.pop("vpc_name")
 
+    # Create the device in Netbox
+    netbox_service = NetboxService()
+
+    try:
+        netbox_device = netbox_service.create_device(
+            NetboxDeviceCreate(
+                name=data.name,
+                device_type=1,  # FIXME: device_data.device_type,
+                site=1,  # FIXME: zone?,
+                role=settings.NETBOX_ROUTER_ROLE,
+            )
+        )
+    except HTTPException as e:
+        raise e
+
+    netbox_id = netbox_device.id
+    dump["netbox_id"] = netbox_id
+
+    # Create the router in the database
     try:
         router = await Router.create(**dump)
     except IntegrityError:
+        # Delete the device from Netbox in case of error
+        try:
+            netbox_service.delete_device(netbox_id)
+        except HTTPException as e:
+            logger.error(f"Failed to delete device '{data.name}' from Netbox: {e}")
+
         raise RouterCreateError()
 
     return router
